@@ -29,12 +29,62 @@ func TestCreateGeneratesDiscoveryProject(t *testing.T) {
 		}
 	}
 
-	state, err := os.ReadFile(filepath.Join(root, ".factory/FACTORY_STATE.md"))
+	state := readGeneratedFile(t, root, ".factory/FACTORY_STATE.md")
+	if !strings.Contains(state, "phase: DISCOVERY") {
+		t.Fatalf("expected DISCOVERY phase, got:\n%s", state)
+	}
+}
+
+func TestCreateGeneratesAdvancedAgentContracts(t *testing.T) {
+	parent := t.TempDir()
+	root, err := Create(Config{Name: "demo", Architect: "chatgpt", Executor: "opencode", ParentDir: parent})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(string(state), "phase: DISCOVERY") {
-		t.Fatalf("expected DISCOVERY phase, got:\n%s", state)
+
+	agents := readGeneratedFile(t, root, "AGENTS.md")
+	for _, expected := range []string{
+		"## Sources of truth",
+		"## Authority boundary",
+		"## Execution cycle",
+		"ARCHITECT_DECISION_REQUIRED",
+		"PREFLIGHT",
+		"deterministic final verification",
+		"Never weaken, delete, skip, or rewrite tests",
+		"## Completion conditions",
+		"## Git discipline",
+	} {
+		if !strings.Contains(agents, expected) {
+			t.Errorf("AGENTS.md missing contract marker %q", expected)
+		}
+	}
+
+	tester := readGeneratedFile(t, root, ".opencode/agents/tester.md")
+	for _, expected := range []string{
+		"### PREFLIGHT",
+		"### FINAL",
+		"## Final report contract",
+		"BLOCKED_ENVIRONMENT",
+		"### COMMANDS_AND_RESULTS",
+		"### REGRESSION_RISK",
+	} {
+		if !strings.Contains(tester, expected) {
+			t.Errorf("tester.md missing contract marker %q", expected)
+		}
+	}
+
+	reviewer := readGeneratedFile(t, root, ".opencode/agents/reviewer.md")
+	for _, expected := range []string{
+		"## Review dimensions",
+		"### Architecture compliance",
+		"## Verdict contract",
+		"FINDINGS",
+		"ARCHITECT_DECISION_REQUIRED",
+		"### VERIFICATION_ASSESSMENT",
+	} {
+		if !strings.Contains(reviewer, expected) {
+			t.Errorf("reviewer.md missing contract marker %q", expected)
+		}
 	}
 }
 
@@ -43,4 +93,13 @@ func TestCreateRejectsInvalidName(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected invalid project name to fail")
 	}
+}
+
+func readGeneratedFile(t *testing.T, root, path string) string {
+	t.Helper()
+	content, err := os.ReadFile(filepath.Join(root, path))
+	if err != nil {
+		t.Fatalf("read %s: %v", path, err)
+	}
+	return string(content)
 }
