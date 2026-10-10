@@ -40,7 +40,7 @@ func runNew(args []string, stdout, stderr io.Writer) error {
 	outputDir := fs.String("dir", ".", "parent directory in which the project directory is created")
 
 	if len(args) == 0 {
-		return errors.New("usage: principalfoundry new <project-name> [--architect chatgpt] [--executor opencode] [--dir .]")
+		return errors.New("usage: pfoundry new <project-name> [--architect chatgpt] [--executor opencode] [--dir .]")
 	}
 	name := args[0]
 	if err := fs.Parse(args[1:]); err != nil {
@@ -72,8 +72,8 @@ func printUsage(w io.Writer) {
 	fmt.Fprintln(w, `PrincipalFoundry - bootstrap senior-led AI software teams
 
 Usage:
-  principalfoundry new <project-name> [options]
-  principalfoundry version
+  pfoundry new <project-name> [options]
+  pfoundry version
 
 Commands:
   new       Create a PrincipalFoundry project in DISCOVERY phase
