@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/frosk1/PrincipalFoundry/internal/gitrepo"
 	"github.com/frosk1/PrincipalFoundry/internal/project"
 )
 
@@ -62,9 +63,18 @@ func runNew(args []string, stdout, stderr io.Writer) error {
 		return err
 	}
 
+	if err := gitrepo.Init(path); err != nil {
+		return fmt.Errorf("created project at %s but failed to initialize git: %w", path, err)
+	}
+
 	fmt.Fprintf(stdout, "Created PrincipalFoundry project %q at %s\n", cfg.Name, path)
+	fmt.Fprintln(stdout, "Initialized Git repository on branch main")
+	fmt.Fprintln(stdout, "Created bootstrap commit: chore: initialize PrincipalFoundry project")
 	fmt.Fprintln(stdout, "Phase: DISCOVERY")
-	fmt.Fprintln(stdout, "Next: open the repository with your architect and run the discovery process before issuing implementation tasks.")
+	fmt.Fprintln(stdout)
+	fmt.Fprintln(stdout, gitrepo.RemoteInstructions(path))
+	fmt.Fprintln(stdout)
+	fmt.Fprintln(stdout, "After pushing, open the repository with your architect and run discovery before issuing implementation tasks.")
 	return nil
 }
 
