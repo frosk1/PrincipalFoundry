@@ -88,6 +88,117 @@ func TestCreateGeneratesAdvancedAgentContracts(t *testing.T) {
 	}
 }
 
+func TestCreateGeneratesExecutorSpecificSubagents(t *testing.T) {
+	tests := []struct {
+		name       string
+		executor   string
+		expected   []string
+		absent     []string
+		testerPath string
+		marker     string
+	}{
+		{
+			name:       "opencode",
+			executor:   "opencode",
+			expected:   []string{".opencode/agents/tester.md", ".opencode/agents/reviewer.md"},
+			absent:     []string{".claude/agents/tester.md", ".codex/agents/tester.toml"},
+			testerPath: ".opencode/agents/tester.md",
+			marker:     "mode: subagent",
+		},
+		{
+			name:       "claude-code",
+			executor:   "claude-code",
+			expected:   []string{".claude/agents/tester.md", ".claude/agents/reviewer.md"},
+			absent:     []string{".opencode/agents/tester.md", ".codex/agents/tester.toml"},
+			testerPath: ".claude/agents/tester.md",
+			marker:     "name: tester",
+		},
+		{
+			name:       "codex",
+			executor:   "codex",
+			expected:   []string{".codex/agents/tester.toml", ".codex/agents/reviewer.toml"},
+			absent:     []string{".opencode/agents/tester.md", ".claude/agents/tester.md"},
+			testerPath: ".codex/agents/tester.toml",
+			marker:     "developer_instructions = \"\"\"",
+		},
+		{
+			name:     "none",
+			executor: "none",
+			absent: []string{
+				".opencode/agents/tester.md",
+				".claude/agents/tester.md",
+				".codex/agents/tester.toml",
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			root, err := Create(Config{
+				Name:      "demo",
+				Architect: "chatgpt",
+				Executor:  tt.executor,
+				ParentDir: t.TempDir(),
+			})
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			for _, path := range tt.expected {
+				if _, err := os.Stat(filepath.Join(root, path)); err != nil {
+					t.Errorf("expected %s for executor %s: %v", path, tt.executor, err)
+				}
+			}
+			for _, path := range tt.absent {
+				if _, err := os.Stat(filepath.Join(root, path)); !os.IsNotExist(err) {
+					t.Errorf("did not expect %s for executor %s", path, tt.executor)
+				}
+			}
+
+			if tt.testerPath != "" {
+				content := readGeneratedFile(t, root, tt.testerPath)
+				if !strings.Contains(content, tt.marker) {
+					t.Errorf("%s missing executor-specific marker %q", tt.testerPath, tt.marker)
+				}
+			}
+
+			state := readGeneratedFile(t, root, ".factory/FACTORY_STATE.md")
+			if !strings.Contains(state, "executor: "+tt.executor) {
+				t.Errorf("factory state does not record executor %q", tt.executor)
+			}
+		})
+	}
+}
+
+func TestCreateDefaultsExecutorToOpenCode(t *testing.T) {
+	root, err := Create(Config{Name: "demo", Architect: "chatgpt", ParentDir: t.TempDir()})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := os.Stat(filepath.Join(root, ".opencode/agents/tester.md")); err != nil {
+		t.Fatalf("expected OpenCode tester for default executor: %v", err)
+	}
+	state := readGeneratedFile(t, root, ".factory/FACTORY_STATE.md")
+	if !strings.Contains(state, "executor: opencode") {
+		t.Fatalf("expected normalized default executor in factory state, got:\n%s", state)
+	}
+}
+
+func TestCreateRejectsUnsupportedExecutor(t *testing.T) {
+	_, err := Create(Config{
+		Name:      "demo",
+		Executor:  "unknown-agent",
+		ParentDir: t.TempDir(),
+	})
+	if err == nil {
+		t.Fatal("expected unsupported executor to fail")
+	}
+	if !strings.Contains(err.Error(), "unsupported executor") {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
 func TestCreateRejectsInvalidName(t *testing.T) {
 	_, err := Create(Config{Name: "../escape", ParentDir: t.TempDir()})
 	if err == nil {
