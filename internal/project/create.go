@@ -20,6 +20,12 @@ func Create(cfg Config) (string, error) {
 	if !validName.MatchString(cfg.Name) {
 		return "", fmt.Errorf("invalid project name %q: use letters, numbers, '.', '_' or '-'", cfg.Name)
 	}
+	normalizedExecutor, err := normalizeExecutor(cfg.Executor)
+	if err != nil {
+		return "", err
+	}
+	cfg.Executor = normalizedExecutor
+
 	if cfg.ParentDir == "" {
 		cfg.ParentDir = "."
 	}
