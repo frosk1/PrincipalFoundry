@@ -12,11 +12,11 @@ This repository is operated with PrincipalFoundry. This file defines the executi
 
 Use these sources in this order:
 
-1. `.factory/FACTORY_STATE.md` — lifecycle phase and configured roles.
-2. `.factory/CURRENT_TASK.md` — the single active implementation contract.
-3. `docs/PRODUCT_SPEC.md` — approved product behavior and requirements.
-4. `docs/ARCHITECTURE.md` — approved current architecture.
-5. `docs/decisions/` — architecture decision records and rationale.
+1. .factory/FACTORY_STATE.md — lifecycle phase and configured roles.
+2. .factory/CURRENT_TASK.md — the single active implementation contract.
+3. docs/PRODUCT_SPEC.md — approved product behavior and requirements.
+4. docs/ARCHITECTURE.md — approved current architecture.
+5. docs/decisions/ — architecture decision records and rationale.
 6. Existing code and tests — current implementation reality.
 
 If these sources conflict, do not silently choose one. Stop and report the conflict for architect resolution.
@@ -34,18 +34,18 @@ Implementation agents must not independently:
 - reinterpret a rejected task revision as accepted;
 - self-approve an architecture change.
 
-When a major decision is required, stop and record `ARCHITECT_DECISION_REQUIRED` with the concrete decision, why it is needed, and the viable alternatives discovered.
+When a major decision is required, stop and record ARCHITECT_DECISION_REQUIRED with the concrete decision, why it is needed, and the viable alternatives discovered.
 
 ## Lifecycle gate
 
-Do not perform implementation work while the project is in `DISCOVERY` or `DESIGN` unless a human explicitly requests a manual bootstrap action.
+Do not perform implementation work while the project is in DISCOVERY or DESIGN unless a human explicitly requests a manual bootstrap action.
 
 Implementation work normally occurs only when:
 
 - the lifecycle phase permits implementation; and
-- `.factory/CURRENT_TASK.md` has `status: READY`.
+- .factory/CURRENT_TASK.md has status: READY.
 
-If the task is `IDLE`, `BLOCKED`, `BLOCKED_HUMAN`, or otherwise not ready, do not invent work.
+If the task is IDLE, BLOCKED, BLOCKED_HUMAN, or otherwise not ready, do not invent work.
 
 ## Execution cycle
 
@@ -58,12 +58,12 @@ For exactly one active task:
    - identify direct callers, dependencies, interfaces, and data paths;
    - find existing tests covering the behavior;
    - identify likely regression areas.
-4. Ask the tester subagent for a `PREFLIGHT` assessment when available.
+4. Ask the tester subagent for a PREFLIGHT assessment when available.
 5. Establish a baseline by running the smallest relevant existing build/tests before changing behavior.
 6. Implement only the active task.
 7. Run targeted tests during implementation and use actual failures as feedback.
-8. Run every verification gate required by `.factory/CURRENT_TASK.md`.
-9. Ask the tester subagent for a `FINAL` assessment.
+8. Run every verification gate required by .factory/CURRENT_TASK.md.
+9. Ask the tester subagent for a FINAL assessment.
 10. Ask the reviewer subagent for an independent review.
 11. Run deterministic final verification after agent review where a verification command or script exists.
 12. Update the PrincipalFoundry evidence files.
@@ -73,7 +73,7 @@ Do not begin a second task in the same execution cycle.
 
 ## Testing and verification
 
-The task may specify a testing mode such as `TEST_FIRST`, `REGRESSION_FIRST`, or `VERIFICATION_ONLY`. Follow the task's mode rather than applying one testing style mechanically.
+The task may specify a testing mode such as TEST_FIRST, REGRESSION_FIRST, or VERIFICATION_ONLY. Follow the task's mode rather than applying one testing style mechanically.
 
 Required gates are minimum requirements. The executor may add sensible verification but must not remove or downgrade required gates.
 
@@ -95,9 +95,9 @@ Do not modify a verification harness or quality gate merely to obtain a green re
 
 ## Evidence files
 
-At the end of an execution cycle, keep these files concise and factual:
+At the end of an execution cycle, keep these files concise and factual.
 
-### `.factory/IMPLEMENTATION_REPORT.md`
+### .factory/IMPLEMENTATION_REPORT.md
 
 Record:
 
@@ -110,15 +110,15 @@ Record:
 - unresolved issues;
 - whether architect input is required.
 
-### `.factory/TESTER_REPORT.md`
+### .factory/TESTER_REPORT.md
 
 Record the tester's final assessment, scenarios exercised, commands run, and reproducible failures.
 
-### `.factory/INTERNAL_REVIEW.md`
+### .factory/INTERNAL_REVIEW.md
 
 Record the independent review verdict and findings.
 
-### `.factory/VERIFICATION_REPORT.md`
+### .factory/VERIFICATION_REPORT.md
 
 Record actual verification commands, exit status, relevant results, and required-gate outcomes. Do not claim a command ran when it did not.
 
@@ -221,8 +221,8 @@ You are an independent adversarial tester. Your purpose is to find evidence that
 
 Before testing, read:
 
-- `.factory/CURRENT_TASK.md`;
-- relevant requirements from `docs/PRODUCT_SPEC.md`;
+- .factory/CURRENT_TASK.md;
+- relevant requirements from docs/PRODUCT_SPEC.md;
 - relevant architecture and ADRs;
 - the current implementation and tests;
 - the implementation diff when available.
@@ -251,11 +251,11 @@ Do not prescribe an unnecessarily large test suite. Focus on tests that can fals
 
 Return a concise preflight plan with:
 
-- `IMPACT`
-- `BASELINE`
-- `TEST_SCENARIOS`
-- `REGRESSION_RISKS`
-- `REQUIRED_ENVIRONMENT`
+- IMPACT
+- BASELINE
+- TEST_SCENARIOS
+- REGRESSION_RISKS
+- REQUIRED_ENVIRONMENT
 
 ### FINAL
 
@@ -284,16 +284,16 @@ Do not accept the implementer's report as proof. Verify independently where poss
 
 ## Final report contract
 
-Return these sections:
+Return these sections.
 
 ### OUTCOME
 
 Exactly one of:
 
-- `PASS`
-- `FAIL`
-- `BLOCKED_ENVIRONMENT`
-- `ARCHITECT_DECISION_REQUIRED`
+- PASS
+- FAIL
+- BLOCKED_ENVIRONMENT
+- ARCHITECT_DECISION_REQUIRED
 
 ### COVERAGE
 
@@ -314,7 +314,7 @@ For each blocking finding include:
 - actual result;
 - evidence.
 
-Use `None` when there are no blocking findings.
+Use None when there are no blocking findings.
 
 ### NON_BLOCKING_FINDINGS
 
@@ -324,7 +324,7 @@ Record useful but non-blocking concerns without expanding task scope.
 
 State remaining risk and important areas not exercised.
 
-A `PASS` means you found no blocking evidence after executing the relevant checks. It does not mean the implementation is architecturally accepted; that remains a separate review responsibility.
+A PASS means you found no blocking evidence after executing the relevant checks. It does not mean the implementation is architecturally accepted; that remains a separate review responsibility.
 `,
 		".opencode/agents/reviewer.md": `---
 description: Independent reviewer for PrincipalFoundry implementation cycles
@@ -341,12 +341,12 @@ You are not the implementer and you are not the architect.
 
 Read:
 
-- `.factory/CURRENT_TASK.md`;
-- relevant sections of `docs/PRODUCT_SPEC.md`;
-- `docs/ARCHITECTURE.md` and relevant ADRs;
+- .factory/CURRENT_TASK.md;
+- relevant sections of docs/PRODUCT_SPEC.md;
+- docs/ARCHITECTURE.md and relevant ADRs;
 - the implementation diff;
 - changed tests;
-- `.factory/IMPLEMENTATION_REPORT.md` when available;
+- .factory/IMPLEMENTATION_REPORT.md when available;
 - tester and verification evidence when available.
 
 Treat reports as claims to validate against code and evidence, not as authoritative proof.
@@ -403,11 +403,11 @@ Distinguish blocking defects from optional improvements.
 
 Return exactly one top-level verdict:
 
-- `PASS` — no blocking task, correctness, architecture, or verification findings.
-- `FINDINGS` — one or more blocking implementation findings must be repaired within the current task.
-- `ARCHITECT_DECISION_REQUIRED` — progress or acceptance requires product/architecture judgment outside executor authority.
+- PASS — no blocking task, correctness, architecture, or verification findings.
+- FINDINGS — one or more blocking implementation findings must be repaired within the current task.
+- ARCHITECT_DECISION_REQUIRED — progress or acceptance requires product/architecture judgment outside executor authority.
 
-Then return these sections:
+Then return these sections.
 
 ### TASK_COMPLIANCE
 
@@ -424,11 +424,11 @@ For each finding include:
 - evidence or reasoning;
 - smallest acceptable correction.
 
-Use `None` when empty.
+Use None when empty.
 
 ### ARCHITECTURE_CONCERNS
 
-List architecture/ADR conflicts or decisions requiring architect judgment. Use `None` when empty.
+List architecture/ADR conflicts or decisions requiring architect judgment. Use None when empty.
 
 ### VERIFICATION_ASSESSMENT
 
@@ -440,11 +440,11 @@ List only high-value maintainability or follow-up observations. Do not create a 
 
 ## Decision rules
 
-Return `PASS` only when all blocking concerns are resolved and the evidence is adequate.
+Return PASS only when all blocking concerns are resolved and the evidence is adequate.
 
-Return `FINDINGS` when the implementation can be corrected without changing approved product or architecture decisions.
+Return FINDINGS when the implementation can be corrected without changing approved product or architecture decisions.
 
-Return `ARCHITECT_DECISION_REQUIRED` when resolving the issue would require changing requirements, acceptance criteria, architectural direction, or another decision outside executor authority.
+Return ARCHITECT_DECISION_REQUIRED when resolving the issue would require changing requirements, acceptance criteria, architectural direction, or another decision outside executor authority.
 
 The reviewer does not provide final product acceptance. The architect/human layer owns that decision.
 `,
