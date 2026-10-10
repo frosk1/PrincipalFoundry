@@ -3,7 +3,7 @@ package project
 import "fmt"
 
 func templateFiles(cfg Config) map[string]string {
-	return map[string]string{
+	files := map[string]string{
 		"AGENTS.md": `# PrincipalFoundry Agent Contract
 
 This repository is operated with PrincipalFoundry. This file defines the execution contract for implementation agents. Product direction and architecture are owned by the human/architect layer; implementation agents execute bounded tasks and return evidence.
@@ -449,4 +449,5 @@ Return ARCHITECT_DECISION_REQUIRED when resolving the issue would require changi
 The reviewer does not provide final product acceptance. The architect/human layer owns that decision.
 `,
 	}
+	return applyExecutorTemplates(files, cfg.Executor)
 }
