@@ -97,7 +97,7 @@ The intended setup is:
 ```text
 GitHub repository
    ├── architect agent
-   └── implementation environment / OpenCode
+   └── selected executor (OpenCode / Claude Code / Codex)
 ```
 
 The executor can clone the repository immediately, but it remains idle while the project is in `DISCOVERY`.
@@ -383,11 +383,17 @@ my-project/
 │   ├── INTERNAL_REVIEW.md
 │   └── VERIFICATION_REPORT.md
 │
-└── .opencode/
-    └── agents/
-        ├── tester.md
-        └── reviewer.md
+└── executor-specific subagent configuration
 ```
+
+Executor-specific subagents are generated only for the selected executor:
+
+| Executor | Generated project files |
+| --- | --- |
+| `opencode` | `.opencode/agents/tester.md`, `.opencode/agents/reviewer.md` |
+| `claude-code` | `.claude/agents/tester.md`, `.claude/agents/reviewer.md` |
+| `codex` | `.codex/agents/tester.toml`, `.codex/agents/reviewer.toml` |
+| `none` | No executor-specific subagent files |
 
 The conceptual split is:
 
@@ -401,8 +407,8 @@ docs/
 AGENTS.md
 = executor operating contract
 
-.opencode/agents/
-= OpenCode-specific tester/reviewer definitions
+executor-specific agent directory
+= tester/reviewer definitions in the selected executor's native format
 ```
 
 ## Why Git?
