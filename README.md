@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/assets/principalfoundry-logo.svg" alt="PrincipalFoundry" width="760">
+  <img src="docs/assets/logo.png" alt="PrincipalFoundry" width="760">
 </p>
 
 <p align="center">
@@ -17,7 +17,7 @@ The CLI executable is `pfoundry`.
 Traditional software delivery spreads product, architecture, implementation, QA, and operations across many specialized roles. PrincipalFoundry explores a different model: one or two senior engineers retain product and engineering judgment while an architect agent continuously decomposes, reviews, and coordinates work with implementation, tester, reviewer, and automation agents.
 
 <p align="center">
-  <img src="docs/assets/team-evolution.svg" alt="Traditional software team evolving into a Principal Engineering Team and AI software factory" width="100%">
+  <img src="docs/assets/team_setup.png" alt="Traditional software team evolving into a Principal Engineering Team and AI software factory" width="100%">
 </p>
 
 The human core stays intentionally small. The software factory is the execution system around it: the architect agent and execution agents work in a Git-native feedback loop, returning implementation evidence to the senior engineer instead of replacing senior engineering judgment.
