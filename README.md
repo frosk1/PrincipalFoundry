@@ -1,10 +1,26 @@
-# PrincipalFoundry
+<p align="center">
+  <img src="docs/assets/principalfoundry-logo.svg" alt="PrincipalFoundry" width="760">
+</p>
+
+<p align="center">
+  <strong>Git-native software factories for principal engineering teams.</strong>
+</p>
 
 PrincipalFoundry is a Git-native framework and bootstrap CLI for senior-led AI software teams.
 
 The core idea is simple: a small number of senior engineers work with a strong architect agent to define product direction and architecture, while implementation agents perform most coding, testing, verification, and routine review.
 
 The CLI executable is `pfoundry`.
+
+## The team model
+
+Traditional software delivery spreads product, architecture, implementation, QA, and operations across many specialized roles. PrincipalFoundry explores a different model: one or two senior engineers retain product and engineering judgment while an architect agent continuously decomposes, reviews, and coordinates work with implementation, tester, reviewer, and automation agents.
+
+<p align="center">
+  <img src="docs/assets/team-evolution.svg" alt="Traditional software team evolving into a Principal Engineering Team and AI software factory" width="100%">
+</p>
+
+The human core stays intentionally small. The software factory is the execution system around it: the architect agent and execution agents work in a Git-native feedback loop, returning implementation evidence to the senior engineer instead of replacing senior engineering judgment.
 
 ## Operating model
 
