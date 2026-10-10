@@ -2,6 +2,8 @@
 
 PrincipalFoundry is a Git-native framework and bootstrap CLI for senior-led AI software teams.
 
+The CLI executable is `pfoundry`.
+
 The project is built around a simple operating model:
 
 - senior engineers and a strong architect model define product intent, architecture, and the next small task;
@@ -17,7 +19,7 @@ Early bootstrap. The first milestone is a portable CLI that can create a new Pri
 Planned first workflow:
 
 ```text
-principalfoundry new my-project \
+pfoundry new my-project \
   --architect chatgpt \
   --executor opencode
 ```
