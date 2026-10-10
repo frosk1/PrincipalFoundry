@@ -80,7 +80,13 @@ pfoundry new my-project \
   --executor opencode
 ```
 
-This creates the PrincipalFoundry control files and initializes the project in:
+This creates the PrincipalFoundry control files, initializes a local Git repository on `main`, stages the generated files, and creates the bootstrap commit:
+
+```text
+chore: initialize PrincipalFoundry project
+```
+
+The factory itself starts in:
 
 ```yaml
 phase: DISCOVERY
@@ -88,9 +94,21 @@ phase: DISCOVERY
 
 No implementation task is active yet.
 
-### 2. Create or connect the Git repository
+### 2. Create and connect the remote repository
 
-The generated project becomes the shared repository used by both the architect and executor.
+`pfoundry` intentionally keeps remote creation separate from the local bootstrap. After creating the project it prints commands like:
+
+```bash
+cd /path/to/my-project
+git remote add origin REMOTE_URL
+git push -u origin main
+```
+
+Create an empty remote repository first; do not initialize it with a README, `.gitignore`, or license because the local repository already contains the bootstrap commit.
+
+This local-first flow keeps `pfoundry new` usable with GitHub, GitLab, self-hosted Git, and automated environments without requiring an interactive login.
+
+The generated repository then becomes the shared control plane used by both the architect and executor.
 
 The intended setup is:
 
