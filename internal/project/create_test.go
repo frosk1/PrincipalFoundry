@@ -18,6 +18,7 @@ func TestCreateGeneratesDiscoveryProject(t *testing.T) {
 		"AGENTS.md",
 		"docs/PRODUCT_SPEC.md",
 		"docs/ARCHITECTURE.md",
+		"docs/OPEN_QUESTIONS.md",
 		".factory/FACTORY_STATE.md",
 		".factory/CURRENT_TASK.md",
 		".opencode/agents/tester.md",
@@ -45,6 +46,8 @@ func TestCreateGeneratesAdvancedAgentContracts(t *testing.T) {
 	agents := readGeneratedFile(t, root, "AGENTS.md")
 	for _, expected := range []string{
 		"## Sources of truth",
+		"docs/OPEN_QUESTIONS.md",
+		"REPOSITORY_BOOTSTRAP",
 		"## Authority boundary",
 		"## Execution cycle",
 		"ARCHITECT_DECISION_REQUIRED",
