@@ -142,6 +142,18 @@ ADRs are created only for material architectural decisions that were actually di
 
 This package is the handoff between the discovery/design phase and the software factory.
 
+During repository bootstrap, the files map into the repository as follows:
+
+```text
+PROJECT_BRIEF.md        → .factory/PROJECT_BRIEF.md
+PRODUCT_SPEC.md         → docs/PRODUCT_SPEC.md
+ARCHITECTURE.md         → docs/ARCHITECTURE.md
+OPEN_QUESTIONS.md       → docs/OPEN_QUESTIONS.md
+decisions/*             → docs/decisions/*
+```
+
+The project brief remains bootstrap/orientation context, while product, architecture, open questions, and ADRs become durable design knowledge.
+
 ### 5. Initialize the project repository from the approved design
 
 The planned repository bootstrap command is:
@@ -305,6 +317,8 @@ PRODUCT_SPEC
         +
 ARCHITECTURE / ADRs
         +
+OPEN_QUESTIONS when relevant
+        +
 previous execution evidence
         ↓
 review previous task
@@ -416,6 +430,7 @@ my-project/
 ├── docs/
 │   ├── PRODUCT_SPEC.md
 │   ├── ARCHITECTURE.md
+│   ├── OPEN_QUESTIONS.md
 │   └── decisions/
 │       └── INDEX.md
 │
@@ -464,7 +479,7 @@ PrincipalFoundry deliberately uses Git as the initial factory control plane.
 A typical history can look like:
 
 ```text
-architect: establish product and architecture baseline
+bootstrap: import approved product and architecture baseline
 architect: issue TASK-0001 r1
 executor: complete TASK-0001 r1
 architect: accept TASK-0001 and issue TASK-0002
@@ -489,4 +504,6 @@ This provides:
 
 PrincipalFoundry is currently in early bootstrap.
 
-The first milestone is a portable CLI that can initialize the PrincipalFoundry project structure and agent contracts. Planned next steps include remote GitHub project creation, stronger structured task/report contracts, lifecycle commands, and automation support.
+Today, `pfoundry new` can generate the repository structure, executor-specific subagents, initialize Git, and create the bootstrap commit. The neutral discovery prompt is already versioned in `docs/prompts/discovery-kickoff.md`.
+
+The onboarding model is now moving to the discovery-first flow described above. The next CLI milestone is to implement `pfoundry start` and `pfoundry init --from`, so an approved design package becomes the input to repository bootstrap. After that, the main remaining work is stronger structured task/report contracts, lifecycle commands, optional remote-provider integration, and automation support.
