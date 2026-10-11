@@ -17,7 +17,8 @@ Use these sources in this order:
 3. docs/PRODUCT_SPEC.md — approved product behavior and requirements.
 4. docs/ARCHITECTURE.md — approved current architecture.
 5. docs/decisions/ — architecture decision records and rationale.
-6. Existing code and tests — current implementation reality.
+6. docs/OPEN_QUESTIONS.md — unresolved decisions that must not be silently resolved by implementation agents.
+7. Existing code and tests — current implementation reality.
 
 If these sources conflict, do not silently choose one. Stop and report the conflict for architect resolution.
 
@@ -38,7 +39,7 @@ When a major decision is required, stop and record ARCHITECT_DECISION_REQUIRED w
 
 ## Lifecycle gate
 
-Do not perform implementation work while the project is in DISCOVERY or DESIGN unless a human explicitly requests a manual bootstrap action.
+Do not perform implementation work while the project is in DISCOVERY, DESIGN, or REPOSITORY_BOOTSTRAP unless a human explicitly requests a manual bootstrap action.
 
 Implementation work normally occurs only when:
 
@@ -172,6 +173,12 @@ This document becomes the durable source of truth for what the product must do a
 Status: Not established.
 
 The architect records the current approved technical architecture here after discovery.
+`,
+		"docs/OPEN_QUESTIONS.md": `# Open Questions
+
+No product or architecture questions have been recorded yet.
+
+Use this document for unresolved or intentionally deferred decisions that materially affect the product, architecture, operations, or implementation boundaries. Do not use it as a generic backlog.
 `,
 		"docs/decisions/INDEX.md": `# Architecture Decision Records
 
