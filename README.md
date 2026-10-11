@@ -70,119 +70,148 @@ Git is the shared state, handoff mechanism, and audit trail between the architec
 
 ## Starting a new project
 
-A PrincipalFoundry project does **not** start with an implementation agent choosing technologies from an empty repository. Product and architecture decisions are established first with a senior engineer and the architect agent.
+The intended onboarding flow starts with **product and architecture discovery before the software repository is bootstrapped**.
 
-### 1. Create the PrincipalFoundry project
+The software factory should begin from an approved design baseline, not from an empty repository where implementation agents are expected to discover fundamental product and architecture decisions themselves.
+
+### 1. Start the architect discovery session
+
+Begin with a strong architect model and the senior engineer.
+
+Use the neutral kickoff prompt in:
+
+```text
+docs/prompts/discovery-kickoff.md
+```
+
+The prompt instructs the architect to act as a senior software architect and technical product owner, work iteratively with the user, challenge assumptions, clarify the most important product and architecture questions, and avoid implementation work during this phase.
+
+The planned CLI experience is:
 
 ```bash
-pfoundry new my-project \
+pfoundry start my-project \
   --architect chatgpt \
   --executor opencode
 ```
 
-This creates the PrincipalFoundry control files, initializes a local Git repository on `main`, stages the generated files, and creates the bootstrap commit:
+`pfoundry start` will print the kickoff prompt and the expected output package. This command is not implemented yet; today the prompt can be copied directly from `docs/prompts/discovery-kickoff.md`.
+
+### 2. Run discovery iteratively
+
+The architect and senior engineer work conversationally until the important product and architecture uncertainties are sufficiently clear.
+
+The architect should explore the areas that materially affect the system, including:
+
+- product goal and target users;
+- core workflows and first-version scope;
+- explicit non-goals;
+- business and technical constraints;
+- scale, reliability, performance, security, and privacy requirements;
+- external integrations;
+- deployment environment;
+- major technology constraints or preferences;
+- system boundaries and data ownership;
+- unresolved decisions.
+
+This is deliberately not a one-shot questionnaire. The architect should use each answer to determine the next highest-value questions and actively provide recommendations and trade-offs.
+
+### 3. Approve the initial design baseline
+
+When the architect believes the initial design is sufficiently clear, it summarizes the proposed baseline and remaining uncertainties.
+
+The senior engineer explicitly approves or corrects that baseline before the final design package is produced.
+
+No implementation task should exist yet.
+
+### 4. Produce the design package
+
+After approval, the architect produces:
 
 ```text
-chore: initialize PrincipalFoundry project
-```
-
-The factory itself starts in:
-
-```yaml
-phase: DISCOVERY
-```
-
-No implementation task is active yet.
-
-### 2. Create and connect the remote repository
-
-`pfoundry` intentionally keeps remote creation separate from the local bootstrap. After creating the project it prints commands like:
-
-```bash
-cd /path/to/my-project
-git remote add origin REMOTE_URL
-git push -u origin main
-```
-
-Create an empty remote repository first; do not initialize it with a README, `.gitignore`, or license because the local repository already contains the bootstrap commit.
-
-This local-first flow keeps `pfoundry new` usable with GitHub, GitLab, self-hosted Git, and automated environments without requiring an interactive login.
-
-The generated repository then becomes the shared control plane used by both the architect and executor.
-
-The intended setup is:
-
-```text
-GitHub repository
-   ├── architect agent
-   └── selected executor (OpenCode / Claude Code / Codex)
-```
-
-The executor can clone the repository immediately, but it remains idle while the project is in `DISCOVERY`.
-
-### 3. Run discovery with the architect agent
-
-Open the repository with the strong architect model and start an interactive discovery conversation with the senior engineer.
-
-During discovery, the architect should clarify:
-
-- the product goal and target users;
-- primary workflows and requirements;
-- non-goals;
-- technical and operational constraints;
-- expected scale and performance;
-- security and data requirements;
-- deployment expectations;
-- external systems and integrations;
-- programming language and framework choices;
-- persistence and infrastructure choices;
-- major architecture boundaries;
-- unresolved design questions.
-
-Discovery is intentionally conversational. The implementation agent does not participate yet.
-
-The working synthesis is stored in:
-
-```text
-.factory/PROJECT_BRIEF.md
-```
-
-### 4. Establish the design baseline
-
-Once the human senior engineer approves the discovery outcome, the architect converts it into durable project documents:
-
-```text
-docs/
+design-package/
+├── PROJECT_BRIEF.md
 ├── PRODUCT_SPEC.md
 ├── ARCHITECTURE.md
+├── OPEN_QUESTIONS.md
 └── decisions/
     ├── INDEX.md
     └── ADR-*.md
 ```
 
-These documents define what the implementation side is allowed to build against.
+ADRs are created only for material architectural decisions that were actually discussed and approved. Open or intentionally deferred decisions remain in `OPEN_QUESTIONS.md`.
 
-The architect owns major product and architecture decisions. The executor may make local implementation choices, but it must not silently replace frameworks, databases, protocols, architectural patterns, acceptance criteria, or product requirements.
+This package is the handoff between the discovery/design phase and the software factory.
 
-### 5. Human review before implementation
+### 5. Initialize the project repository from the approved design
 
-The initial product specification, architecture, and important ADRs should be reviewed by the senior engineer before implementation begins.
+The planned repository bootstrap command is:
 
-This is a high-value approval point.
+```bash
+pfoundry init my-project \
+  --from ./design-package \
+  --architect chatgpt \
+  --executor opencode
+```
 
-After approval, the project moves toward scaffolding and manual validation.
+The intended behavior is:
 
-### 6. Architect issues the first task
+```text
+validate design package
+        ↓
+create repository structure
+        ↓
+install approved product + architecture documents
+        ↓
+create .factory/ control files
+        ↓
+create AGENTS.md
+        ↓
+create executor-specific tester/reviewer agents
+        ↓
+git init
+        ↓
+bootstrap commit on main
+```
 
-The architect creates exactly one bounded implementation task in:
+The repository is therefore created from an already-understood product and architecture baseline.
+
+`pfoundry init --from` is not implemented yet. The current `pfoundry new` command still creates the repository directly in `DISCOVERY`; this will evolve toward the discovery-first flow described above.
+
+### 6. Connect the remote repository
+
+Remote creation stays separate from the local bootstrap so the workflow remains provider-independent.
+
+After initialization, connect an empty GitHub, GitLab, or other Git remote:
+
+```bash
+git remote add origin REMOTE_URL
+git push -u origin main
+```
+
+Do not initialize the remote with a README, `.gitignore`, or license when the local repository already contains the bootstrap commit.
+
+The repository becomes the shared control plane:
+
+```text
+Git repository
+   ├── senior engineer / architect agent
+   └── selected executor
+       ├── implementer
+       ├── tester
+       └── reviewer
+```
+
+### 7. Architect issues the first implementation task
+
+Only after the approved design has been installed in the repository does the architect create the first bounded implementation task in:
 
 ```text
 .factory/CURRENT_TASK.md
 ```
 
-The first task should normally establish only the minimum project scaffolding and verification harness required by the approved architecture.
+The first task should normally establish the minimum project scaffolding and verification harness required by the approved architecture.
 
-A new project should evolve incrementally, for example:
+A project should then evolve through small coherent increments:
 
 ```text
 TASK-0001  project skeleton and build/test tooling
@@ -198,7 +227,7 @@ TASK-0004  first thin end-to-end product capability
 
 The architect should never issue a task equivalent to “implement the entire product”.
 
-### 7. Run the implementation cycle manually
+### 8. Run the implementation cycle manually
 
 Before enabling automation, run the executor manually.
 
@@ -242,19 +271,11 @@ The executor records evidence in:
 └── VERIFICATION_REPORT.md
 ```
 
-### 8. Architect reviews the implementation
+### 9. Architect reviews the implementation
 
-The architect reads:
+The architect reads the active task, implementation diff, implementation report, tester evidence, independent review, deterministic verification results, and relevant product and architecture documents.
 
-- the active task and revision;
-- the implementation diff;
-- implementation report;
-- tester evidence;
-- independent review;
-- deterministic verification results;
-- relevant product and architecture documents.
-
-It then does one of three things:
+It then chooses one of three outcomes:
 
 ```text
 ACCEPT
@@ -271,6 +292,7 @@ BLOCK / ESCALATE
 ```
 
 The architect should judge the actual code and evidence rather than trusting reports blindly.
+
 
 ## Architect cycle
 
@@ -337,12 +359,14 @@ If a task requires such a decision, the executor returns `ARCHITECT_DECISION_REQ
 
 ## Lifecycle
 
-PrincipalFoundry projects move through explicit phases:
+The overall process moves through explicit phases:
 
 ```text
 DISCOVERY
    ↓
 DESIGN
+   ↓
+REPOSITORY_BOOTSTRAP
    ↓
 SCAFFOLDING
    ↓
@@ -355,15 +379,19 @@ PAUSED
 
 ### DISCOVERY
 
-Human senior engineer and architect establish the product and major constraints.
+The senior engineer and architect establish the product, users, scope, constraints, and important unknowns. This phase can happen before a project repository exists.
 
 ### DESIGN
 
-The architect converts discovery into the product specification, architecture, and ADRs.
+The architect converts the approved discovery outcome into the design package: product specification, architecture, open questions, and material ADRs.
+
+### REPOSITORY_BOOTSTRAP
+
+The approved design package is turned into the Git repository, factory control files, executor contract, and executor-specific subagents.
 
 ### SCAFFOLDING
 
-The implementation agent creates the initial code/project structure according to the approved architecture.
+The implementation agent creates the initial application structure according to the approved architecture.
 
 ### MANUAL_VALIDATION
 
@@ -379,7 +407,7 @@ No autonomous implementation should proceed.
 
 ## Generated project structure
 
-A new project currently starts with:
+After repository bootstrap, the project structure is intended to contain:
 
 ```text
 my-project/
