@@ -3,18 +3,22 @@
 </p>
 
 <p align="center">
-  <strong>Git-native software factories for principal engineering teams.</strong>
+  <strong>Git-native software factories for orchestrator-led agentic engineering teams.</strong>
 </p>
 
-PrincipalFoundry is a Git-native framework and bootstrap CLI for senior-led AI software teams.
+PrincipalFoundry is a Git-native framework and bootstrap CLI for orchestrator-led agentic engineering.
 
-The core idea is simple: a small number of senior engineers work with a strong architect agent to define product direction and architecture, while implementation agents perform most coding, testing, verification, and routine review.
+A small number of senior engineers operate increasingly in orchestrator mode: they define intent, product direction, architecture, constraints, and quality standards while coding agents perform most implementation, testing, verification, and routine review inside an engineered harness.
+
+PrincipalFoundry targets the disciplined end of AI-assisted software development: **agentic engineering rather than vibe coding**. Agents are given bounded goals, structured context, architectural constraints, verification gates, and explicit feedback loops instead of being asked to generate software from loosely specified prompts.
 
 The CLI executable is `pfoundry`.
 
 ## The team model
 
-Traditional software delivery spreads product, architecture, implementation, QA, and operations across many specialized roles. PrincipalFoundry explores a different model: one or two senior engineers retain product and engineering judgment while an architect agent continuously decomposes, reviews, and coordinates work with implementation, tester, reviewer, and automation agents.
+Traditional software delivery spreads product, architecture, implementation, QA, and operations across many specialized roles. PrincipalFoundry explores a different model: one or two senior engineers retain product and engineering judgment while operating as **orchestrators**. They define goals, make architectural trade-offs, set quality standards, and evaluate results rather than manually producing most implementation.
+
+The architect agent supports the orchestrator by maintaining product and architecture context, decomposing approved direction into bounded work, and reviewing execution evidence. Coding, tester, reviewer, and automation agents operate underneath that layer.
 
 <p align="center">
   <img src="docs/assets/team_setup.png" alt="Traditional software team evolving into a Principal Engineering Team and AI software factory" width="100%">
@@ -22,14 +26,20 @@ Traditional software delivery spreads product, architecture, implementation, QA,
 
 The human core stays intentionally small. The software factory is the execution system around it: the architect agent and execution agents work in a Git-native feedback loop, returning implementation evidence to the senior engineer instead of replacing senior engineering judgment.
 
-## Operating model
+## Agentic engineering model
+
+PrincipalFoundry combines three ideas: **human orchestration**, **harness engineering**, and a **Git-native software factory**.
+
+- Human orchestration defines who directs the system: senior engineers own intent, trade-offs, architecture, and final judgment.
+- Harness engineering defines what informs and constrains agents: specifications, context, tools, guardrails, verification, and feedback.
+- The software factory defines how bounded implementation work is repeatedly produced, tested, reviewed, and accepted.
 
 PrincipalFoundry separates architectural judgment from implementation throughput.
 
 ```text
-Senior engineer
+Senior engineer / orchestrator
       ↕
-Architect agent
+Architect / planning agent
       │
       ├── product requirements
       ├── architecture
@@ -41,7 +51,7 @@ Architect agent
 Git repository
       │
       ▼
-Implementation agent ◄───────────────────────────────┐
+Coding / implementation agent ◄──────────────────────┐
       │                                              │
       ├── impact analysis                            │
       ├── coding                                     │
@@ -68,6 +78,45 @@ Implementation agent ◄──────────────────�
 
 Git is the shared state, handoff mechanism, and audit trail between the architect and execution side.
 
+## Harness engineering
+
+PrincipalFoundry is not a coding model and it is not a replacement for tools such as OpenCode, Codex, or Claude Code. Those tools are execution engines. PrincipalFoundry standardizes the engineering harness around them.
+
+The harness consists of:
+
+```text
+Specifications and engineered context
+├── docs/PRODUCT_SPEC.md
+├── docs/ARCHITECTURE.md
+├── docs/OPEN_QUESTIONS.md
+└── docs/decisions/
+
+Static context and guardrails
+└── AGENTS.md
+
+Durable orchestration state
+├── .factory/FACTORY_STATE.md
+└── .factory/CURRENT_TASK.md
+
+Agent execution
+├── coding / implementation agent
+├── tester agent
+└── reviewer agent
+
+Feedback and evidence
+├── .factory/IMPLEMENTATION_REPORT.md
+├── .factory/TESTER_REPORT.md
+├── .factory/INTERNAL_REVIEW.md
+└── .factory/VERIFICATION_REPORT.md
+
+Control plane
+└── Git
+```
+
+Discovery and design are therefore not merely planning steps. They are **context engineering**: turning human intent into structured product, architecture, decision, and constraint context that coding agents can reliably act upon.
+
+The design package is the initial engineered context for the software factory. The agent contracts, task protocol, verification gates, and evidence files form the execution harness around that context.
+
 ## Starting a new project
 
 The intended onboarding flow starts with **product and architecture discovery before the software repository is bootstrapped**.
@@ -76,7 +125,7 @@ The software factory should begin from an approved design baseline, not from an 
 
 ### 1. Start the architect discovery session
 
-Begin with a strong architect model and the senior engineer.
+Begin with a strong architect model and the senior engineer acting as orchestrator.
 
 Use the neutral kickoff prompt in:
 
@@ -98,7 +147,7 @@ pfoundry start my-project \
 
 ### 2. Run discovery iteratively
 
-The architect and senior engineer work conversationally until the important product and architecture uncertainties are sufficiently clear.
+The architect and senior engineer/orchestrator work conversationally until the important product and architecture uncertainties are sufficiently clear.
 
 The architect should explore the areas that materially affect the system, including:
 
@@ -119,7 +168,7 @@ This is deliberately not a one-shot questionnaire. The architect should use each
 
 When the architect believes the initial design is sufficiently clear, it summarizes the proposed baseline and remaining uncertainties.
 
-The senior engineer explicitly approves or corrects that baseline before the final design package is produced.
+The senior engineer/orchestrator explicitly approves or corrects that baseline before the final design package is produced.
 
 No implementation task should exist yet.
 
@@ -243,7 +292,7 @@ The architect should never issue a task equivalent to “implement the entire pr
 
 Before enabling automation, run the executor manually.
 
-The implementation agent follows `AGENTS.md` and processes exactly one active task.
+The coding / implementation agent follows `AGENTS.md` and processes exactly one active task.
 
 Its cycle is:
 
@@ -306,7 +355,7 @@ BLOCK / ESCALATE
 The architect should judge the actual code and evidence rather than trusting reports blindly.
 
 
-## Architect cycle
+## Architect / planning cycle
 
 Once a project is established, the architect loop is intentionally small and repeatable:
 
@@ -346,9 +395,9 @@ The architect is responsible for:
 
 The architect should not normally perform the implementation itself, even if technically capable of editing the repository.
 
-## Executor cycle
+## Agent execution loop
 
-The executor is responsible for implementation throughput within the architect-defined boundaries.
+The executor is the adapter to the selected coding-agent environment and is responsible for implementation throughput within architect-defined boundaries.
 
 It may:
 
@@ -393,7 +442,7 @@ PAUSED
 
 ### DISCOVERY
 
-The senior engineer and architect establish the product, users, scope, constraints, and important unknowns. This phase can happen before a project repository exists.
+The senior engineer/orchestrator and architect establish the product, users, scope, constraints, and important unknowns. This phase can happen before a project repository exists.
 
 ### DESIGN
 
@@ -405,7 +454,7 @@ The approved design package is turned into the Git repository, factory control f
 
 ### SCAFFOLDING
 
-The implementation agent creates the initial application structure according to the approved architecture.
+The coding / implementation agent creates the initial application structure according to the approved architecture.
 
 ### MANUAL_VALIDATION
 
@@ -460,16 +509,16 @@ The conceptual split is:
 
 ```text
 docs/
-= durable product and architecture knowledge
+= durable product, architecture, and engineered context
 
 .factory/
-= current PrincipalFoundry workflow state and evidence
+= durable orchestration state and execution evidence
 
 AGENTS.md
-= executor operating contract
+= static agent context, guardrails, and execution contract
 
 executor-specific agent directory
-= tester/reviewer definitions in the selected executor's native format
+= tester/reviewer definitions in the selected coding-agent environment's native format
 ```
 
 ## Why Git?
@@ -506,4 +555,6 @@ PrincipalFoundry is currently in early bootstrap.
 
 Today, `pfoundry new` can generate the repository structure, executor-specific subagents, initialize Git, and create the bootstrap commit. The neutral discovery prompt is already versioned in `docs/prompts/discovery-kickoff.md`.
 
-The onboarding model is now moving to the discovery-first flow described above. The next CLI milestone is to implement `pfoundry start` and `pfoundry init --from`, so an approved design package becomes the input to repository bootstrap. After that, the main remaining work is stronger structured task/report contracts, lifecycle commands, optional remote-provider integration, and automation support.
+The onboarding model is now moving to the discovery-first flow described above. The next CLI milestone is to implement `pfoundry start` and `pfoundry init --from`, so an approved design package becomes the input to repository bootstrap.
+
+After that, the main remaining work is stronger structured task/report contracts, lifecycle commands, optional remote-provider integration, automation support, and eventually richer harness observability and evaluation of agent behavior in addition to deterministic software tests.
