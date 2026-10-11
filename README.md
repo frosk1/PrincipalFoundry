@@ -41,29 +41,29 @@ Architect agent
 Git repository
       │
       ▼
-Implementation agent
-      │
-      ├── impact analysis
-      ├── coding
-      ├── targeted tests
-      ├── integration verification
-      └── implementation evidence
-      │
-      ├──────────────┐
-      ▼              ▼
- Tester agent    Reviewer agent
-      │              │
-      └──────┬───────┘
-             ▼
- deterministic verification
-             │
-             ▼
-       Architect review
-             │
-       accept / revise
-             │
-             ▼
-        next small task
+Implementation agent ◄───────────────────────────────┐
+      │                                              │
+      ├── impact analysis                            │
+      ├── coding                                     │
+      ├── targeted tests                             │
+      ├── integration verification                   │
+      └── implementation evidence                    │
+      │                                              │
+      ├──────────────┐                               │
+      ▼              ▼                               │
+ Tester agent    Reviewer agent                      │
+      │              │                               │
+      └──────┬───────┘                               │
+             ▼                                       │
+ deterministic verification                         │
+             │                                       │
+             ▼                                       │
+       Architect review                              │
+             │                                       │
+       accept / revise                               │
+             │                                       │
+             ▼                                       │
+        next small task ─────────────────────────────┘
 ```
 
 Git is the shared state, handoff mechanism, and audit trail between the architect and execution side.
