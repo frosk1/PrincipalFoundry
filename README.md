@@ -558,3 +558,19 @@ Today, `pfoundry new` can generate the repository structure, executor-specific s
 The onboarding model is now moving to the discovery-first flow described above. The next CLI milestone is to implement `pfoundry start` and `pfoundry init --from`, so an approved design package becomes the input to repository bootstrap.
 
 After that, the main remaining work is stronger structured task/report contracts, lifecycle commands, optional remote-provider integration, automation support, and eventually richer harness observability and evaluation of agent behavior in addition to deterministic software tests.
+
+## Contributing
+
+PrincipalFoundry is still early and the architecture is evolving.
+
+Before implementing a substantial change:
+
+1. Open an issue describing the problem or proposed capability.
+2. Explain why it belongs in the project and how it fits the current architecture.
+3. Wait for scope/architecture alignment before starting large changes.
+4. Keep pull requests small and focused.
+5. Link the PR to the corresponding issue.
+
+For broad ideas or architectural discussion, use GitHub Discussions instead of opening an implementation PR directly.
+
+Small documentation fixes and obvious bug fixes may be submitted directly as pull requests.
