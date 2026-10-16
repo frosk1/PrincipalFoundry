@@ -205,16 +205,17 @@ The project brief remains bootstrap/orientation context, while product, architec
 
 ### 5. Initialize the project repository from the approved design
 
-The planned repository bootstrap command is:
+The repository bootstrap command is:
 
 ```bash
 pfoundry init my-project \
   --from ./design-package \
   --architect chatgpt \
-  --executor opencode
+  --executor opencode \
+  [--task ./design-package/implementation/TASK-0001.md]
 ```
 
-The intended behavior is:
+The behavior is:
 
 ```text
 validate design package
@@ -236,7 +237,11 @@ bootstrap commit on main
 
 The repository is therefore created from an already-understood product and architecture baseline.
 
-`pfoundry init --from` is not implemented yet. The current `pfoundry new` command still creates the repository directly in `DISCOVERY`; this will evolve toward the discovery-first flow described above.
+`pfoundry init --from` validates the design package (requiring `PROJECT_BRIEF.md`, `PRODUCT_SPEC.md`, `ARCHITECTURE.md`, `OPEN_QUESTIONS.md`, and `decisions/INDEX.md`), installs the approved documents into `docs/` and `.factory/`, generates the repository skeleton, and creates the bootstrap commit on `main`. The design package's `decisions/*` records are copied into `docs/decisions/*`.
+
+With `--task`, the given implementation task is installed as the active `.factory/CURRENT_TASK.md` (with `status: READY`) and the factory phase advances to `SCAFFOLDING`. Without `--task`, the phase is recorded as `REPOSITORY_BOOTSTRAP` and the architect issues the first task from `.factory/CURRENT_TASK.md`.
+
+The `pfoundry new` command still exists for starting a repository directly in `DISCOVERY`; `pfoundry init --from` implements the discovery-first flow described above.
 
 ### 6. Connect the remote repository
 
@@ -553,9 +558,9 @@ This provides:
 
 PrincipalFoundry is currently in early bootstrap.
 
-Today, `pfoundry new` can generate the repository structure, executor-specific subagents, initialize Git, and create the bootstrap commit. The neutral discovery prompt is already versioned in `docs/prompts/discovery-kickoff.md`.
+Today, `pfoundry new` can generate the repository structure directly in `DISCOVERY`, and `pfoundry init --from` can bootstrap a repository from an approved discovery design package, installing the product/architecture documents and optionally activating the first implementation task. Both initialize Git and create the bootstrap commit. The neutral discovery prompt is already versioned in `docs/prompts/discovery-kickoff.md`.
 
-The onboarding model is now moving to the discovery-first flow described above. The next CLI milestone is to implement `pfoundry start` and `pfoundry init --from`, so an approved design package becomes the input to repository bootstrap.
+The next CLI milestone is `pfoundry start`, so an approved design package is produced interactively before it becomes the input to `pfoundry init --from`.
 
 After that, the main remaining work is stronger structured task/report contracts, lifecycle commands, optional remote-provider integration, automation support, and eventually richer harness observability and evaluation of agent behavior in addition to deterministic software tests.
 

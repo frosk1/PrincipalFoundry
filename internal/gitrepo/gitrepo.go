@@ -8,6 +8,11 @@ import (
 
 const initialCommitMessage = "chore: initialize PrincipalFoundry project"
 
+// InitialCommitMessage is the message used for the repository bootstrap commit.
+func InitialCommitMessage() string {
+	return initialCommitMessage
+}
+
 func Init(path string) error {
 	if _, err := exec.LookPath("git"); err != nil {
 		return fmt.Errorf("git is required but was not found in PATH")

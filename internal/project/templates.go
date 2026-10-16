@@ -184,16 +184,7 @@ Use this document for unresolved or intentionally deferred decisions that materi
 
 No architecture decisions have been recorded yet.
 `,
-		".factory/FACTORY_STATE.md": fmt.Sprintf(`---
-phase: DISCOVERY
-architect: %s
-executor: %s
----
-
-# Factory State
-
-The project is in DISCOVERY. Human and architect should establish product intent, requirements, constraints, architecture, and initial decisions before implementation begins.
-`, cfg.Architect, cfg.Executor),
+		".factory/FACTORY_STATE.md": factoryStateContent("DISCOVERY", cfg.Architect, cfg.Executor),
 		".factory/PROJECT_BRIEF.md": fmt.Sprintf(`# Project Brief
 
 Project: %s
@@ -457,4 +448,31 @@ The reviewer does not provide final product acceptance. The architect/human laye
 `,
 	}
 	return applyExecutorTemplates(files, cfg.Executor)
+}
+
+// factoryStateContent renders the factory state control file for a lifecycle phase.
+func factoryStateContent(phase, architect, executor string) string {
+	return fmt.Sprintf(`---
+phase: %s
+architect: %s
+executor: %s
+---
+
+# Factory State
+
+%s
+`, phase, architect, executor, factoryPhaseDescription(phase))
+}
+
+func factoryPhaseDescription(phase string) string {
+	switch phase {
+	case "DISCOVERY":
+		return "The project is in DISCOVERY. Human and architect should establish product intent, requirements, constraints, architecture, and initial decisions before implementation begins."
+	case "REPOSITORY_BOOTSTRAP":
+		return "The approved design package has been imported into the repository. The architect should issue the first bounded implementation task in .factory/CURRENT_TASK.md before implementation begins."
+	case "SCAFFOLDING":
+		return "The project is in SCAFFOLDING. The coding / implementation agent may create the initial application structure for the active task in .factory/CURRENT_TASK.md."
+	default:
+		return fmt.Sprintf("The project is in %s.", phase)
+	}
 }
