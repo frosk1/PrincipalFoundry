@@ -7,6 +7,7 @@ import (
 	"io"
 	"strings"
 
+	"github.com/frosk1/PrincipalFoundry/docs/prompts"
 	"github.com/frosk1/PrincipalFoundry/internal/gitrepo"
 	"github.com/frosk1/PrincipalFoundry/internal/project"
 )
@@ -24,6 +25,8 @@ func Run(args []string, stdout, stderr io.Writer) error {
 		return runNew(args[1:], stdout, stderr)
 	case "init":
 		return runInit(args[1:], stdout, stderr)
+	case "prompt":
+		return runPrompt(args[1:], stdout, stderr)
 	case "version", "--version", "-v":
 		fmt.Fprintln(stdout, version)
 		return nil
@@ -141,16 +144,54 @@ func runInit(args []string, stdout, stderr io.Writer) error {
 	return nil
 }
 
+
+func runPrompt(args []string, stdout, stderr io.Writer) error {
+	if len(args) == 0 {
+		return errors.New("usage: pfoundry prompt architect-loop --repo <github-repository-url>")
+	}
+
+	switch args[0] {
+	case "architect-loop":
+		fs := flag.NewFlagSet("prompt architect-loop", flag.ContinueOnError)
+		fs.SetOutput(stderr)
+		repositoryURL := fs.String("repo", "", "HTTPS GitHub repository URL, for example https://github.com/owner/repo")
+
+		if err := fs.Parse(args[1:]); err != nil {
+			return err
+		}
+		if fs.NArg() != 0 {
+			return errors.New("unexpected positional arguments")
+		}
+		if strings.TrimSpace(*repositoryURL) == "" {
+			return errors.New("--repo <github-repository-url> is required")
+		}
+
+		rendered, err := prompts.RenderArchitectDevelopmentLoop(*repositoryURL)
+		if err != nil {
+			return err
+		}
+		fmt.Fprint(stdout, rendered)
+		if !strings.HasSuffix(rendered, "\n") {
+			fmt.Fprintln(stdout)
+		}
+		return nil
+	default:
+		return fmt.Errorf("unknown prompt %q", args[0])
+	}
+}
+
 func printUsage(w io.Writer) {
 	fmt.Fprintln(w, `PrincipalFoundry - bootstrap senior-led AI software teams
 
 Usage:
   pfoundry new <project-name> [options]
   pfoundry init <project-name> --from <design-package> [options]
+  pfoundry prompt architect-loop --repo <github-repository-url>
   pfoundry version
 
 Commands:
   new       Create a PrincipalFoundry project in DISCOVERY phase
   init      Bootstrap a project repository from an approved design package
+  prompt    Render a ready-to-use agent prompt
   version   Print the CLI version`)
 }
