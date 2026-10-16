@@ -362,6 +362,17 @@ The architect should judge the actual code and evidence rather than trusting rep
 
 ## Architect / planning cycle
 
+For a recurring architect job, render the repository-specific prompt directly from the CLI:
+
+```bash
+pfoundry prompt architect-loop \
+  --repo https://github.com/owner/project
+```
+
+The command writes only the ready-to-use prompt to stdout. It substitutes the repository URL into the versioned template at `docs/prompts/architect-development-loop.md`, where the reusable template contains the placeholder `{{GITHUB_REPOSITORY_URL}}`.
+
+This makes it suitable for copying into a scheduled ChatGPT Work task or piping into another automation without extra CLI status text.
+
 Once a project is established, the architect loop is intentionally small and repeatable:
 
 ```text
@@ -558,7 +569,7 @@ This provides:
 
 PrincipalFoundry is currently in early bootstrap.
 
-Today, `pfoundry new` can generate the repository structure directly in `DISCOVERY`, and `pfoundry init --from` can bootstrap a repository from an approved discovery design package, installing the product/architecture documents and optionally activating the first implementation task. Both initialize Git and create the bootstrap commit. The neutral discovery prompt is already versioned in `docs/prompts/discovery-kickoff.md`.
+Today, `pfoundry new` can generate the repository structure directly in `DISCOVERY`, and `pfoundry init --from` can bootstrap a repository from an approved discovery design package, installing the product/architecture documents and optionally activating the first implementation task. Both initialize Git and create the bootstrap commit. The neutral discovery prompt is versioned in `docs/prompts/discovery-kickoff.md`, and `pfoundry prompt architect-loop --repo ...` renders the repository-specific recurring architect prompt from `docs/prompts/architect-development-loop.md`.
 
 The next CLI milestone is `pfoundry start`, so an approved design package is produced interactively before it becomes the input to `pfoundry init --from`.
 
