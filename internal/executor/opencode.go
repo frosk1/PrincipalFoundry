@@ -41,13 +41,17 @@ func (ExecRunner) Run(ctx context.Context, dir string, command []string, stdout,
 }
 
 // executorCommand builds the process command line for the supported executors.
-// The attach URL is supplied explicitly rather than being globally hard-coded.
-func executorCommand(executor, attach, prompt string) ([]string, error) {
+// The attach URL and model are supplied explicitly rather than being globally
+// hard-coded. The model uses the OpenCode form provider/model#variant.
+func executorCommand(executor, attach, model, prompt string) ([]string, error) {
 	switch strings.ToLower(strings.TrimSpace(executor)) {
 	case "", "opencode":
 		command := []string{"opencode", "run"}
 		if strings.TrimSpace(attach) != "" {
 			command = append(command, "--server", strings.TrimSpace(attach))
+		}
+		if strings.TrimSpace(model) != "" {
+			command = append(command, "--model", strings.TrimSpace(model))
 		}
 		return append(command, prompt), nil
 	default:

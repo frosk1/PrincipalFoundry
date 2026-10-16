@@ -472,6 +472,10 @@ pfoundry executor status --json
 
 ```bash
 pfoundry executor tick --executor opencode --attach http://127.0.0.1:4096
+
+# pin the model explicitly
+pfoundry executor tick --executor opencode --attach http://127.0.0.1:4096 \
+  --model openrouter/deepseek/deepseek-v4.1-flash
 ```
 
 `tick` performs one safe, idempotent cycle:
@@ -495,6 +499,8 @@ invoke the executor only when READY_TO_EXECUTE
 ```
 
 `--attach` points the executor at an already-running agent server (for example the existing OpenCode server on localhost). If it is omitted, the executor's normal non-attached mode is used. `--executor` defaults to the `executor` recorded in `.factory/FACTORY_STATE.md`.
+
+`--model` selects the model the executor runs with, in OpenCode's `provider/model#variant` form (for example `openrouter/deepseek/deepseek-v4.1-flash` or `openrouter/anthropic/claude-sonnet-latest`). If it is omitted, the executor uses its own default model. Pinning the model explicitly keeps scheduled execution reproducible.
 
 After the executor exits, Git and the factory evidence remain authoritative: a zero exit code is not proof of completion. If the executor leaves an unsafe or incomplete state, the cycle reports `ERROR` rather than claiming success.
 
