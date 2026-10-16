@@ -118,6 +118,39 @@ determine the smallest coherent next implementation task.
 
 Do not issue work while the lifecycle state forbids implementation.
 
+# Executor handoff identity
+
+The deterministic executor gate identifies an executor result using the machine-readable frontmatter in:
+
+.factory/IMPLEMENTATION_REPORT.md
+
+Expected fields are:
+
+---
+task_id: TASK-XXXX
+revision: N
+status: COMPLETED | FAILED | BLOCKED | BLOCKED_HUMAN | ARCHITECT_DECISION_REQUIRED
+result_commit: <commit-hash>
+---
+
+When determining whether new executor work exists:
+
+- match the implementation report against the active CURRENT_TASK using task_id + revision;
+- only treat evidence for the active task revision as the executor result for that task;
+- do not confuse evidence from an older task or revision with the current task;
+- use result_commit, when present, to identify the implementation commit to review;
+- inspect the actual Git diff and verification evidence rather than trusting the status field alone.
+
+When issuing a new task or revision:
+
+- preserve the task_id for revisions of the same task;
+- increment revision only when requesting a concrete revision of that task;
+- use a new task_id only for genuinely new work;
+- do not fabricate executor evidence;
+- do not pre-populate IMPLEMENTATION_REPORT.md with the new task identity as though execution had already occurred.
+
+The executor is responsible for writing the implementation report for the task revision it executes.
+
 # Architect review of completed work
 
 Never accept implementation based only on the executor's summary.
