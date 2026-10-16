@@ -436,6 +436,97 @@ It may not independently:
 
 If a task requires such a decision, the executor returns `ARCHITECT_DECISION_REQUIRED`.
 
+## Autonomous executor gate
+
+An autonomous loop separates three concerns:
+
+```text
+scheduler        owns WHEN to check
+PrincipalFoundry owns WHETHER execution is allowed
+the executor     owns IMPLEMENTATION
+```
+
+A scheduler (systemd timer, cron, or another orchestrator) only decides when to look at the repository. It must not decide whether work may run, and it must not invoke a coding agent on every tick. `pfoundry executor` is the deterministic gate between the schedule and the implementation agent.
+
+### Checking state
+
+```bash
+pfoundry executor status
+pfoundry executor status --json
+```
+
+`status` inspects the repository containing the current working directory and reports the effective executor state without changing anything or contacting the network. The JSON form is stable and suitable for scripting.
+
+| State | Meaning |
+| --- | --- |
+| `READY_TO_EXECUTE` | A READY task revision has no executor handoff yet and the factory phase permits autonomous execution. |
+| `WAITING_ARCHITECT` | The executor already produced evidence for this task revision; the loop is waiting for architect review. |
+| `NO_ACTIVE_TASK` | `CURRENT_TASK.md` is IDLE or absent. |
+| `PAUSED` | The factory phase is `PAUSED`. |
+| `BLOCKED_HUMAN` | The task, or the latest evidence, requires a human/architect decision. |
+| `ALREADY_RUNNING` | Another executor cycle currently holds the repository lock. |
+| `PHASE_BLOCKED` | The lifecycle phase does not permit autonomous execution. |
+| `ERROR` | The repository is in an unsafe state (dirty worktree, divergent history, unreadable control files, or a failed executor handoff). |
+
+### Running one cycle
+
+```bash
+pfoundry executor tick --executor opencode --attach http://127.0.0.1:4096
+```
+
+`tick` performs one safe, idempotent cycle:
+
+```text
+acquire executor lock
+      ↓
+locate repository root
+      ↓
+require a clean worktree
+      ↓
+fetch the remote
+      ↓
+fast-forward the default branch only
+      ↓
+read FACTORY_STATE, CURRENT_TASK, and executor evidence
+      ↓
+decide the effective state
+      ↓
+invoke the executor only when READY_TO_EXECUTE
+```
+
+`--attach` points the executor at an already-running agent server (for example the existing OpenCode server on localhost). If it is omitted, the executor's normal non-attached mode is used. `--executor` defaults to the `executor` recorded in `.factory/FACTORY_STATE.md`.
+
+After the executor exits, Git and the factory evidence remain authoritative: a zero exit code is not proof of completion. If the executor leaves an unsafe or incomplete state, the cycle reports `ERROR` rather than claiming success.
+
+### A five-minute timer does not mean an LLM call every five minutes
+
+The gate exits before invoking any agent unless the state is `READY_TO_EXECUTE`. Every other outcome is a cheap no-op that prints one concise line:
+
+```text
+NO_ACTION: waiting for architect review of TASK-0012 r1
+NO_ACTION: factory phase SCAFFOLDING does not permit autonomous execution
+```
+
+No-work ticks create no commits and do not modify the repository.
+
+### Task idempotency
+
+Idempotency is keyed on the implementation task identity, `task_id + revision`, never on elapsed time:
+
+- a READY task revision with no matching executor evidence is executable;
+- once the executor records `.factory/IMPLEMENTATION_REPORT.md` evidence whose `task_id` and `revision` match the active task, the gate stops executing that revision and reports `WAITING_ARCHITECT`;
+- an architect-issued higher `revision`, or a new `task_id`, is new executable work.
+
+The executor evidence frontmatter (`task_id`, `revision`, `status`, `result_commit`) is what identifies the handoff; `AGENTS.md` defines the exact contract.
+
+### Git is the synchronization boundary
+
+The scheduler and the executor never coordinate directly. The architect commits and pushes a handoff; the executor `fetch`es, fast-forwards, and executes only committed state, then commits and pushes its own handoff. Only committed repository state exists from the executor's perspective. Git operations are conservative: the gate requires a clean worktree, synchronizes fast-forward-only, and never rebases, resets, force-pushes, or discards local work. If safe synchronization is impossible it reports `ERROR` and does not invoke the executor.
+
+### Executor locking
+
+Each cycle takes a lock in the repository's Git directory (never committed to Git). It prevents overlapping timer runs, a timer run during a manual tick, and concurrent manual ticks. The lock uses an advisory file lock, so it is released automatically if a process crashes or the machine reboots.
+
 ## Lifecycle
 
 The overall process moves through explicit phases:
@@ -571,9 +662,11 @@ PrincipalFoundry is currently in early bootstrap.
 
 Today, `pfoundry new` can generate the repository structure directly in `DISCOVERY`, and `pfoundry init --from` can bootstrap a repository from an approved discovery design package, installing the product/architecture documents and optionally activating the first implementation task. Both initialize Git and create the bootstrap commit. The neutral discovery prompt is versioned in `docs/prompts/discovery-kickoff.md`, and `pfoundry prompt architect-loop --repo ...` renders the repository-specific recurring architect prompt from `docs/prompts/architect-development-loop.md`.
 
+`pfoundry executor status` and `pfoundry executor tick` now provide the deterministic executor gate described above, so a scheduler such as a systemd timer can safely drive the loop without invoking a coding agent when there is no executable task.
+
 The next CLI milestone is `pfoundry start`, so an approved design package is produced interactively before it becomes the input to `pfoundry init --from`.
 
-After that, the main remaining work is stronger structured task/report contracts, lifecycle commands, optional remote-provider integration, automation support, and eventually richer harness observability and evaluation of agent behavior in addition to deterministic software tests.
+The main remaining work is stronger structured task/report contracts, lifecycle transition commands, optional remote-provider integration, wiring the architect loop to a scheduler, and eventually richer harness observability and evaluation of agent behavior in addition to deterministic software tests.
 
 ## Contributing
 

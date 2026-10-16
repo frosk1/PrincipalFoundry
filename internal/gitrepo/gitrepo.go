@@ -1,6 +1,7 @@
 package gitrepo
 
 import (
+	"bytes"
 	"fmt"
 	"os/exec"
 	"strings"
@@ -53,4 +54,29 @@ func run(path string, args ...string) error {
 		return fmt.Errorf("git %s failed: %s", strings.Join(args, " "), detail)
 	}
 	return nil
+}
+
+// Run runs git in dir and returns an error when the command fails.
+func Run(dir string, args ...string) error {
+	return run(dir, args...)
+}
+
+// Output runs git in dir and returns the trimmed standard output of the command.
+func Output(dir string, args ...string) (string, error) {
+	cmd := exec.Command("git", args...)
+	cmd.Dir = dir
+	var stdout, stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+	if err := cmd.Run(); err != nil {
+		detail := strings.TrimSpace(stderr.String())
+		if detail == "" {
+			detail = strings.TrimSpace(stdout.String())
+		}
+		if detail == "" {
+			return "", fmt.Errorf("git %s failed: %w", strings.Join(args, " "), err)
+		}
+		return "", fmt.Errorf("git %s failed: %s", strings.Join(args, " "), detail)
+	}
+	return strings.TrimSpace(stdout.String()), nil
 }

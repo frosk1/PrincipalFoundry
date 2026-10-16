@@ -91,6 +91,31 @@ func TestCreateGeneratesAdvancedAgentContracts(t *testing.T) {
 	}
 }
 
+func TestCreateGeneratesExecutorEvidenceContract(t *testing.T) {
+	root, err := Create(Config{Name: "demo", Architect: "chatgpt", Executor: "opencode", ParentDir: t.TempDir()})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	agents := readGeneratedFile(t, root, "AGENTS.md")
+	for _, marker := range []string{
+		"task_id: TASK-XXXX",
+		"result_commit",
+		"idempotent",
+	} {
+		if !strings.Contains(agents, marker) {
+			t.Errorf("AGENTS.md missing executor evidence contract marker %q", marker)
+		}
+	}
+
+	report := readGeneratedFile(t, root, ".factory/IMPLEMENTATION_REPORT.md")
+	for _, marker := range []string{"task_id:", "revision:", "status:", "result_commit:"} {
+		if !strings.Contains(report, marker) {
+			t.Errorf("implementation report placeholder missing frontmatter field %q", marker)
+		}
+	}
+}
+
 func TestCreateGeneratesExecutorSpecificSubagents(t *testing.T) {
 	tests := []struct {
 		name       string

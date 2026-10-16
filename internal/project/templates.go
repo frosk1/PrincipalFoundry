@@ -100,9 +100,19 @@ At the end of an execution cycle, keep these files concise and factual.
 
 ### .factory/IMPLEMENTATION_REPORT.md
 
-Record:
+Begin the file with machine-readable frontmatter so the deterministic executor gate can identify which task revision the evidence belongs to:
 
-- task id and revision;
+    ---
+    task_id: TASK-XXXX
+    revision: N
+    status: COMPLETED | FAILED | BLOCKED | BLOCKED_HUMAN | ARCHITECT_DECISION_REQUIRED
+    result_commit: <commit-hash>
+    ---
+
+The task_id and revision fields must match .factory/CURRENT_TASK.md exactly. This is what makes repeated scheduled execution idempotent: once this evidence exists for a task revision, the executor gate will not run that revision again until the architect issues a new revision or a new task.
+
+Then record:
+
 - completion status;
 - base and result commit when available;
 - implementation summary;
@@ -201,11 +211,21 @@ status: IDLE
 
 No implementation task has been issued. Implementation must not begin while the project is in DISCOVERY.
 `,
-		".factory/REVIEW.md":                "# Architect Review\n\nNo implementation has been reviewed yet.\n",
-		".factory/IMPLEMENTATION_REPORT.md": "# Implementation Report\n\nNo implementation cycle has run yet.\n",
-		".factory/TESTER_REPORT.md":         "# Tester Report\n\nNo test cycle has run yet.\n",
-		".factory/INTERNAL_REVIEW.md":       "# Internal Review\n\nNo internal review has run yet.\n",
-		".factory/VERIFICATION_REPORT.md":   "# Verification Report\n\nNo verification cycle has run yet.\n",
+		".factory/REVIEW.md": "# Architect Review\n\nNo implementation has been reviewed yet.\n",
+		".factory/IMPLEMENTATION_REPORT.md": `---
+task_id:
+revision:
+status:
+result_commit:
+---
+
+# Implementation Report
+
+No implementation cycle has run yet.
+`,
+		".factory/TESTER_REPORT.md":       "# Tester Report\n\nNo test cycle has run yet.\n",
+		".factory/INTERNAL_REVIEW.md":     "# Internal Review\n\nNo internal review has run yet.\n",
+		".factory/VERIFICATION_REPORT.md": "# Verification Report\n\nNo verification cycle has run yet.\n",
 		".opencode/agents/tester.md": `---
 description: Adversarial tester for PrincipalFoundry implementation cycles
 mode: subagent
