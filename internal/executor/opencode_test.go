@@ -12,6 +12,7 @@ func TestExecutorCommandOpenCode(t *testing.T) {
 		executor string
 		attach   string
 		model    string
+		auto     bool
 		prompt   string
 		want     []string
 	}{
@@ -36,11 +37,27 @@ func TestExecutorCommandOpenCode(t *testing.T) {
 			prompt:   "p",
 			want:     []string{"opencode", "run", "--model", "openrouter/deepseek/deepseek-v4.1-flash#high", "p"},
 		},
+		{
+			name:     "auto approval",
+			executor: "opencode",
+			auto:     true,
+			prompt:   "p",
+			want:     []string{"opencode", "run", "--auto", "p"},
+		},
+		{
+			name:     "full",
+			executor: "opencode",
+			attach:   "http://127.0.0.1:4096",
+			model:    "openrouter/deepseek/deepseek-v4.1-flash#high",
+			auto:     true,
+			prompt:   "do it",
+			want:     []string{"opencode", "run", "--server", "http://127.0.0.1:4096", "--model", "openrouter/deepseek/deepseek-v4.1-flash#high", "--auto", "do it"},
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := executorCommand(tt.executor, tt.attach, tt.model, tt.prompt)
+			got, err := executorCommand(tt.executor, tt.attach, tt.model, tt.auto, tt.prompt)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -52,7 +69,7 @@ func TestExecutorCommandOpenCode(t *testing.T) {
 }
 
 func TestExecutorCommandRejectsUnsupported(t *testing.T) {
-	if _, err := executorCommand("codex", "", "", "p"); err == nil {
+	if _, err := executorCommand("codex", "", "", false, "p"); err == nil {
 		t.Fatal("expected unsupported executor to fail")
 	}
 }

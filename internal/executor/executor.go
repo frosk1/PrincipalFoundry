@@ -85,6 +85,7 @@ type TickConfig struct {
 	Executor string
 	Attach   string
 	Model    string
+	Auto     bool
 	Runner   Runner
 	Stdout   io.Writer
 	Stderr   io.Writer
@@ -182,7 +183,7 @@ func Tick(ctx context.Context, cfg TickConfig) (TickResult, error) {
 	}
 
 	executor := resolveExecutor(cfg.Executor, snap.Factory)
-	command, err := executorCommand(executor, cfg.Attach, cfg.Model, executionPrompt(snap.RepoURL, snap.Task))
+	command, err := executorCommand(executor, cfg.Attach, cfg.Model, cfg.Auto, executionPrompt(snap.RepoURL, snap.Task))
 	if err != nil {
 		return fail(err)
 	}

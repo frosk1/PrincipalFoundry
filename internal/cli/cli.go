@@ -253,6 +253,7 @@ func runExecutorTick(args []string, stdout, stderr io.Writer) error {
 	executorName := fs.String("executor", "", "implementation executor (defaults to the factory state, e.g. opencode)")
 	attach := fs.String("attach", "", "attach to an existing executor server, e.g. http://127.0.0.1:4096")
 	model := fs.String("model", "", "executor model in provider/model#variant form, e.g. openrouter/deepseek/deepseek-v4.1-flash")
+	auto := fs.Bool("auto", false, "auto-approve non-denied executor permissions for unattended runs")
 	verbose := fs.Bool("verbose", false, "print the executor command and full output")
 
 	if err := fs.Parse(args); err != nil {
@@ -271,6 +272,7 @@ func runExecutorTick(args []string, stdout, stderr io.Writer) error {
 		Executor: *executorName,
 		Attach:   *attach,
 		Model:    *model,
+		Auto:     *auto,
 		Runner:   executor.ExecRunner{},
 		Stdout:   stdout,
 		Stderr:   stderr,
@@ -293,7 +295,7 @@ Usage:
   pfoundry init <project-name> --from <design-package> [options]
   pfoundry prompt architect-loop --repo <github-repository-url>
   pfoundry executor status [--json] [--dir .] [--remote origin]
-  pfoundry executor tick [--executor opencode] [--attach URL] [--model provider/model#variant] [--dir .] [--remote origin] [--verbose]
+  pfoundry executor tick [--executor opencode] [--attach URL] [--model provider/model#variant] [--auto] [--dir .] [--remote origin] [--verbose]
   pfoundry version
 
 Commands:

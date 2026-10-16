@@ -502,6 +502,8 @@ invoke the executor only when READY_TO_EXECUTE
 
 `--model` selects the model the executor runs with, in OpenCode's `provider/model#variant` form (for example `openrouter/deepseek/deepseek-v4.1-flash` or `openrouter/anthropic/claude-sonnet-latest`). If it is omitted, the executor uses its own default model. Pinning the model explicitly keeps scheduled execution reproducible.
 
+`--auto` auto-approves executor permissions that are not explicitly denied. Unattended runs generally need it, otherwise the executor can stall waiting for an interactive approval that never arrives.
+
 After the executor exits, Git and the factory evidence remain authoritative: a zero exit code is not proof of completion. If the executor leaves an unsafe or incomplete state, the cycle reports `ERROR` rather than claiming success.
 
 ### A five-minute timer does not mean an LLM call every five minutes
