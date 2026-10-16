@@ -208,6 +208,9 @@ func runExecutorStatus(args []string, stdout, stderr io.Writer) error {
 	asJSON := fs.Bool("json", false, "print machine-readable JSON")
 
 	if err := fs.Parse(args); err != nil {
+		if errors.Is(err, flag.ErrHelp) {
+			return nil
+		}
 		return err
 	}
 	if fs.NArg() != 0 {
@@ -252,6 +255,9 @@ func runExecutorTick(args []string, stdout, stderr io.Writer) error {
 	verbose := fs.Bool("verbose", false, "print the executor command and full output")
 
 	if err := fs.Parse(args); err != nil {
+		if errors.Is(err, flag.ErrHelp) {
+			return nil
+		}
 		return err
 	}
 	if fs.NArg() != 0 {
