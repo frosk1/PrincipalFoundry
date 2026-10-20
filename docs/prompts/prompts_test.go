@@ -20,6 +20,24 @@ func TestArchitectDevelopmentLoopTemplateTracksMilestones(t *testing.T) {
 	}
 }
 
+func TestArchitectDevelopmentLoopRequiresStatusReportForEveryRun(t *testing.T) {
+	template := ArchitectDevelopmentLoopTemplate()
+	for _, marker := range []string{
+		"# Mandatory execution status",
+		"Every invocation must conclude with a non-empty, user-facing execution report",
+		"Task ID and revision examined:",
+		"Latest repository commit examined:",
+		"New executor evidence found:",
+		"Git changed:",
+		"Summary:",
+		"READY/no-new-evidence NO_ACTION rule",
+	} {
+		if !strings.Contains(template, marker) {
+			t.Fatalf("architect prompt missing mandatory status marker %q", marker)
+		}
+	}
+}
+
 func TestRenderArchitectDevelopmentLoopInjectsNormalizedRepositoryURL(t *testing.T) {
 	got, err := RenderArchitectDevelopmentLoop(" https://github.com/frosk1/Principalfoundry.git/ ")
 	if err != nil {
