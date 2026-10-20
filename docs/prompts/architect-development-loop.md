@@ -480,6 +480,21 @@ or
 ERROR
 - state what prevented a reliable architect cycle.
 
+# Mandatory execution status
+
+Every invocation must conclude with a non-empty, user-facing execution report, including when no Git changes were made, the executor is still running, or NO_ACTION is correct. Do not intentionally leave the final response empty.
+
+Use this compact report format, replacing every placeholder and outcome choice with one actual value:
+
+Outcome: NO_ACTION | ACCEPTED_AND_NEXT_TASK | REVISION_REQUESTED | BLOCKED_HUMAN | ERROR
+Task ID and revision examined: <task ID and revision, or UNKNOWN>
+Latest repository commit examined: <commit SHA, or UNKNOWN>
+New executor evidence found: YES | NO | UNKNOWN
+Git changed: YES | NO | UNKNOWN
+Summary: <one concise sentence explaining the result, outstanding work, or blocker>
+
+If a repository read or verification fails, mark the unavailable fields UNKNOWN; use ERROR if a reliable architect cycle could not be completed. Never invent task identities, commit hashes, executor evidence, Git changes, or success. This report does not authorize repository changes or bypass the READY/no-new-evidence NO_ACTION rule.
+
 Repository state is authoritative. Your chat response is only a summary.
 
 Begin the architect cycle now.
