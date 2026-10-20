@@ -14,11 +14,12 @@ Use these sources in this order:
 
 1. .factory/FACTORY_STATE.md — lifecycle phase and configured roles.
 2. .factory/CURRENT_TASK.md — the single active implementation contract.
-3. docs/PRODUCT_SPEC.md — approved product behavior and requirements.
-4. docs/ARCHITECTURE.md — approved current architecture.
-5. docs/decisions/ — architecture decision records and rationale.
-6. docs/OPEN_QUESTIONS.md — unresolved decisions that must not be silently resolved by implementation agents.
-7. Existing code and tests — current implementation reality.
+3. .factory/MILESTONE.md — architect-owned product milestone context; never a license to expand the active task.
+4. docs/PRODUCT_SPEC.md — approved product behavior and requirements.
+5. docs/ARCHITECTURE.md — approved current architecture.
+6. docs/decisions/ — architecture decision records and rationale.
+7. docs/OPEN_QUESTIONS.md — unresolved decisions that must not be silently resolved by implementation agents.
+8. Existing code and tests — current implementation reality.
 
 If these sources conflict, do not silently choose one. Stop and report the conflict for architect resolution.
 
@@ -71,6 +72,14 @@ For exactly one active task:
 13. Commit only when the task completion conditions are satisfied.
 
 Do not begin a second task in the same execution cycle.
+
+## Finding-driven repair and evidence
+
+For every blocking tester/reviewer finding, record the violated invariant and a reproducible failure hypothesis before changing application code. Investigate the root cause and prefer a general correction to an input-specific patch. Add or retain a regression that detects the original failure, run it against the prior result when feasible and required, then run the affected and mandated broader gates.
+
+Obtain fresh tester and independent reviewer re-verification after material repairs. A PASS from before those changes is not a final verdict. Do not claim that a test proves a deadline, concurrency interleaving or security boundary unless the fixture actually creates the claimed condition. In high-risk cases, use a disposable negative control to establish that the test detects a broken guard.
+
+Do not expand task scope to chase hypothetical edge cases; distinguish reproduced defects, source-supported risks, and remaining uncertainty. Retain the existing repair limit and escalation behavior.
 
 ## Testing and verification
 
@@ -172,7 +181,7 @@ Treat Git as the factory handoff and audit log.
 
 The goal is not to maximize code output. The goal is to produce the smallest correct, verifiable change that advances the approved project.
 `,
-		"docs/PRODUCT_SPEC.md": `# Product Specification
+		"""docs/PRODUCT_SPEC.md": `# Product Specification
 
 Status: Not established.
 
@@ -203,6 +212,15 @@ Status: Discovery in progress.
 
 Use this document to synthesize the initial human/architect discovery conversation. It is bootstrap context; once approved, durable product requirements belong in docs/PRODUCT_SPEC.md and durable technical decisions belong in docs/ARCHITECTURE.md and docs/decisions/.
 `, cfg.Name),
+		".factory/MILESTONE.md": `---
+milestone_id:
+status: UNSET
+---
+
+# Active Product Milestone
+
+No active milestone has been established yet. The architect may define one from approved product direction at the next legitimate handoff. This is not an implementation task or permission to change an already READY task.
+`,
 		".factory/CURRENT_TASK.md": `---
 status: IDLE
 ---
@@ -289,6 +307,16 @@ Run after implementation.
 8. Separate implementation defects from environment/infrastructure failures.
 
 Do not accept the implementer's report as proof. Verify independently where possible.
+
+## Critical invariants and falsifiability
+
+Your purpose is to find counterexamples, not to maximize green test counts. At PREFLIGHT, identify the few highest-risk invariants, concrete failure hypotheses, and an executable way to trigger each failure. Choose risks relevant to the change: transaction/concurrency interleavings, protocol and serialization variants, runtime/library compatibility, configuration precedence, security authority, and deadline/cancellation/resource behavior.
+
+For every critical assertion, ask: does the fixture actually produce the promised condition; what observable value would differ if the protection failed; and would the assertion fail with a broken implementation? Avoid treating adjacent happy-path coverage, a configuration field assertion, or an unblocked reader as proof of an actual boundary.
+
+When repairing a critical invariant, reproduce red behavior against the genuine prior implementation when feasible. For a high-risk test, use a targeted, disposable negative control (remove or bypass the guard, break a deadline or otherwise perturb the fixture) where practical. Do not mutate production sources in the shared worktree just for a negative control. Explain unverified scenarios rather than claiming them covered.
+
+Include a concise invariant-evidence mapping in FINAL: criterion, failure hypothesis, test/fixture, observed result, whether the test would catch the defect, and gaps. Favor a few meaningful probes over an exhaustive mechanical checklist.
 
 ## Rules
 
@@ -404,6 +432,14 @@ Review the change for:
 - Are important negative or regression cases absent?
 - Do tester and deterministic verification results support the claimed completion?
 - Has any test or quality gate been weakened?
+
+## Independent counterexample review
+
+Before reading the tester's or implementer's PASS conclusions, inspect the task contract, production diff and relevant tests yourself. Identify the key assumptions and seek plausible counterexamples, particularly involving transaction visibility/locking, network and wire semantics, external library/runtime behavior, OS/file descriptors, security authority and cancellation/timeouts.
+
+Challenge what the tests actually establish: would they fail if the claimed protection were absent? Do their fixtures produce a real race, blocked write, incompatible protocol, invalid credential or outage, or merely an adjacent happy path? Use focused source reasoning, a bounded experiment or an executable regression when practical. Distinguish reproduced defects, source-supported risks and unverified hypotheses; do not manufacture findings to avoid PASS.
+
+After forming this independent view, compare it with the tester and implementation reports. Explicitly identify any material disagreement and which acceptance criterion is affected. PASS requires both absence of discovered blockers and adequate evidence for the critical claims; it is not the same as architect acceptance.
 
 ## Boundaries
 

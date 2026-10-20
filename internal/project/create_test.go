@@ -20,6 +20,7 @@ func TestCreateGeneratesDiscoveryProject(t *testing.T) {
 		"docs/ARCHITECTURE.md",
 		"docs/OPEN_QUESTIONS.md",
 		".factory/FACTORY_STATE.md",
+		".factory/MILESTONE.md",
 		".factory/CURRENT_TASK.md",
 		".opencode/agents/tester.md",
 		".opencode/agents/reviewer.md",
@@ -30,6 +31,10 @@ func TestCreateGeneratesDiscoveryProject(t *testing.T) {
 		}
 	}
 
+	milestone := readGeneratedFile(t, root, ".factory/MILESTONE.md")
+	if !strings.Contains(milestone, "status: UNSET") {
+		t.Fatalf("expected an unset milestone, got:\n%s", milestone)
+	}
 	state := readGeneratedFile(t, root, ".factory/FACTORY_STATE.md")
 	if !strings.Contains(state, "phase: DISCOVERY") {
 		t.Fatalf("expected DISCOVERY phase, got:\n%s", state)
@@ -50,6 +55,7 @@ func TestCreateGeneratesAdvancedAgentContracts(t *testing.T) {
 		"REPOSITORY_BOOTSTRAP",
 		"## Authority boundary",
 		"## Execution cycle",
+		"## Finding-driven repair and evidence",
 		"ARCHITECT_DECISION_REQUIRED",
 		"PREFLIGHT",
 		"deterministic final verification",
@@ -70,6 +76,7 @@ func TestCreateGeneratesAdvancedAgentContracts(t *testing.T) {
 		"BLOCKED_ENVIRONMENT",
 		"### COMMANDS_AND_RESULTS",
 		"### REGRESSION_RISK",
+		"## Critical invariants and falsifiability",
 	} {
 		if !strings.Contains(tester, expected) {
 			t.Errorf("tester.md missing contract marker %q", expected)
@@ -84,6 +91,7 @@ func TestCreateGeneratesAdvancedAgentContracts(t *testing.T) {
 		"FINDINGS",
 		"ARCHITECT_DECISION_REQUIRED",
 		"### VERIFICATION_ASSESSMENT",
+		"## Independent counterexample review",
 	} {
 		if !strings.Contains(reviewer, expected) {
 			t.Errorf("reviewer.md missing contract marker %q", expected)

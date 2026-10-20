@@ -96,6 +96,7 @@ Static context and guardrails
 
 Durable orchestration state
 ├── .factory/FACTORY_STATE.md
+├── .factory/MILESTONE.md (one demonstrable outcome, architect-owned)
 └── .factory/CURRENT_TASK.md
 
 Agent execution

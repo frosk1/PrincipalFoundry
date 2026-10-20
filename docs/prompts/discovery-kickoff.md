@@ -274,6 +274,7 @@ Include:
 - problem being solved;
 - target users;
 - primary value proposition;
+- one proposed, demonstrable first product milestone and how to show it working (within the approved V1 scope, not a future-task backlog);
 - most important workflows;
 - first-version scope;
 - explicit non-goals;
@@ -398,6 +399,7 @@ Before producing the design package, verify that:
 - architecture follows from requirements rather than technology preference alone;
 - important architectural choices have rationale;
 - unresolved questions are explicitly recorded;
+- the proposed first user-demonstrable milestone is grounded in approved scope and does not imply unapproved implementation choices;
 - implementation details have not been unnecessarily over-specified;
 - no implementation task has been created yet.
 

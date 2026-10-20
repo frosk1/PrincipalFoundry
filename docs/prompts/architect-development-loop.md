@@ -44,6 +44,7 @@ Inspect Git history and determine what changed since the most recent architect h
 Read at minimum:
 
 - .factory/FACTORY_STATE.md
+- .factory/MILESTONE.md (if present; UNSET or absent is allowed for older projects)
 - .factory/CURRENT_TASK.md
 - .factory/REVIEW.md
 - .factory/IMPLEMENTATION_REPORT.md
@@ -263,12 +264,34 @@ Explain:
 
 Do not issue another task.
 
+# Milestone-driven product delivery
+
+Maintain one active product milestone in .factory/MILESTONE.md. It is a concrete, user- or operator-demonstrable end-to-end outcome, not a list of tasks, a speculative roadmap, or a replacement for the approved product and architecture baseline.
+
+For each milestone, record:
+- milestone_id and status (UNSET, ACTIVE, BLOCKED_HUMAN, or COMPLETE);
+- observable outcome and the user/operator workflow;
+- a reproducible end-to-end acceptance demonstration;
+- verified working behavior, remaining gaps, and important dependencies;
+- evidence of completion and any material human-owned decision gates.
+
+If the milestone file is absent or UNSET in an existing project, establish the first milestone using already-approved requirements as part of the next legitimate architect handoff. Do not change a READY task or make a commit solely to initialize milestone tracking. If a milestone would require unapproved product direction, escalate rather than invent one.
+
+After accepting a task, evaluate actual progress against the milestone using executable evidence. Update the milestone only when observable progress or its status genuinely changes. Do not claim a milestone complete because component-level tests pass; require the described integrated demonstration (or explicitly record BLOCKED_HUMAN when the necessary decision is outside architect authority).
+
+On completion, select the next milestone only within approved product direction and as part of a legitimate handoff; do not create a backlog of future milestones.
+
+When choosing the next task, identify the single most important unmet behavior preventing the active milestone. Prefer a small vertical increment that moves toward a working demonstration. A foundational or internal-only task is justified when it is a necessary dependency; explain the direct link to the milestone. Avoid repeated isolated infrastructure increments that do not unlock an observable outcome.
+
+Do not sacrifice required security, correctness, human approval, or architecture constraints for milestone speed.
+
 # Choosing the next task
 
 Only choose the next task after the previous task has been accepted or when CURRENT_TASK is legitimately IDLE.
 
 Use:
 
+- .factory/MILESTONE.md (active milestone, if established);
 - PRODUCT_SPEC.md;
 - ARCHITECTURE.md;
 - ADRs;
@@ -324,7 +347,7 @@ Describe one bounded outcome.
 
 # Why this is next
 
-Explain why this is the smallest useful next increment.
+Explain why this is the smallest useful next increment, including how it advances the active milestone or removes a necessary blocker.
 
 # Required behavior
 
@@ -425,6 +448,8 @@ Therefore:
 - repository state, not the schedule, determines what happens.
 
 At most one architect handoff may be produced per scheduled run.
+
+Milestone tracking does not override the READY/no-new-evidence NO_ACTION rule. Never make a standalone milestone-maintenance commit during an in-flight implementation task.
 
 # Human escalation
 
