@@ -181,7 +181,7 @@ Treat Git as the factory handoff and audit log.
 
 The goal is not to maximize code output. The goal is to produce the smallest correct, verifiable change that advances the approved project.
 `,
-		"""docs/PRODUCT_SPEC.md": `# Product Specification
+		"docs/PRODUCT_SPEC.md": `# Product Specification
 
 Status: Not established.
 
