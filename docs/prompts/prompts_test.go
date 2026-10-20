@@ -12,12 +12,12 @@ func TestArchitectDevelopmentLoopTemplateContainsRepositoryPlaceholder(t *testin
 }
 
 func TestArchitectDevelopmentLoopTemplateTracksMilestones(t *testing.T) {
-    template := ArchitectDevelopmentLoopTemplate()
-    for _, marker := range []string{".factory/MILESTONE.md", "# Milestone-driven product delivery", "does not override the READY/no-new-evidence NO_ACTION rule"} {
-        if !strings.Contains(template, marker) {
-            t.Fatalf("architect prompt missing %q", marker)
-        }
-    }
+	template := ArchitectDevelopmentLoopTemplate()
+	for _, marker := range []string{".factory/MILESTONE.md", "# Milestone-driven product delivery", "does not override the READY/no-new-evidence NO_ACTION rule"} {
+		if !strings.Contains(template, marker) {
+			t.Fatalf("architect prompt missing %q", marker)
+		}
+	}
 }
 
 func TestRenderArchitectDevelopmentLoopInjectsNormalizedRepositoryURL(t *testing.T) {
