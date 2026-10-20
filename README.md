@@ -458,6 +458,8 @@ pfoundry executor status --json
 
 `status` inspects the repository containing the current working directory and reports the effective executor state without changing anything or contacting the network. The JSON form is stable and suitable for scripting.
 
+`--ignore-lock` reports the state as if no executor lock were held. It exists for supervisors that already hold the executor lock themselves (for example an architect gate) and must not self-report `ALREADY_RUNNING`.
+
 | State | Meaning |
 | --- | --- |
 | `READY_TO_EXECUTE` | A READY task revision has no executor handoff yet and the factory phase permits autonomous execution. |

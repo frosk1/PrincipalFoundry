@@ -206,6 +206,7 @@ func runExecutorStatus(args []string, stdout, stderr io.Writer) error {
 	dir := fs.String("dir", ".", "repository directory to inspect")
 	remote := fs.String("remote", "origin", "Git remote used to identify the repository")
 	asJSON := fs.Bool("json", false, "print machine-readable JSON")
+	ignoreLock := fs.Bool("ignore-lock", false, "ignore the local executor lock (for callers that already hold it)")
 
 	if err := fs.Parse(args); err != nil {
 		if errors.Is(err, flag.ErrHelp) {
@@ -217,7 +218,11 @@ func runExecutorStatus(args []string, stdout, stderr io.Writer) error {
 		return errors.New("unexpected positional arguments")
 	}
 
-	report, err := executor.Status(*dir, *remote)
+	report, err := executor.StatusWithOptions(executor.StatusOptions{
+		Dir:        *dir,
+		Remote:     *remote,
+		IgnoreLock: *ignoreLock,
+	})
 	if err != nil {
 		return err
 	}
@@ -294,7 +299,7 @@ Usage:
   pfoundry new <project-name> [options]
   pfoundry init <project-name> --from <design-package> [options]
   pfoundry prompt architect-loop --repo <github-repository-url>
-  pfoundry executor status [--json] [--dir .] [--remote origin]
+  pfoundry executor status [--json] [--ignore-lock] [--dir .] [--remote origin]
   pfoundry executor tick [--executor opencode] [--attach URL] [--model provider/model#variant] [--auto] [--dir .] [--remote origin] [--verbose]
   pfoundry version
 

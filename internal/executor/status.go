@@ -15,13 +15,31 @@ type StatusReport struct {
 	ResultCommit string `json:"result_commit"`
 }
 
+// StatusOptions configures a status inspection.
+type StatusOptions struct {
+	Dir    string
+	Remote string
+	// IgnoreLock reports the repository state as if no executor lock were held.
+	// Callers that already hold the lock use this to avoid self-reporting
+	// ALREADY_RUNNING.
+	IgnoreLock bool
+}
+
 // Status inspects the repository containing dir and returns the effective
 // executor state. It does not access the network or mutate the repository.
 func Status(dir, remote string) (StatusReport, error) {
+	return StatusWithOptions(StatusOptions{Dir: dir, Remote: remote})
+}
+
+// StatusWithOptions inspects the repository and returns the effective executor
+// state, honoring the given options. It does not access the network or mutate
+// the repository.
+func StatusWithOptions(opts StatusOptions) (StatusReport, error) {
+	remote := opts.Remote
 	if strings.TrimSpace(remote) == "" {
 		remote = defaultRemote
 	}
-	root, err := Root(dir)
+	root, err := Root(opts.Dir)
 	if err != nil {
 		return StatusReport{}, err
 	}
@@ -37,7 +55,12 @@ func Status(dir, remote string) (StatusReport, error) {
 		gitErr = "worktree has uncommitted changes"
 	}
 
-	snap, err := Inspect(root, remote, Held(gitDir), gitErr)
+	lockHeld := false
+	if !opts.IgnoreLock {
+		lockHeld = Held(gitDir)
+	}
+
+	snap, err := Inspect(root, remote, lockHeld, gitErr)
 	if err != nil {
 		return StatusReport{}, err
 	}

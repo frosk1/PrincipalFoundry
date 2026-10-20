@@ -64,6 +64,37 @@ func TestStatusWaitingArchitect(t *testing.T) {
 	}
 }
 
+func TestStatusLockHandling(t *testing.T) {
+	f := newFixture(t)
+	f.setupAutonomous("TASK-0001", 1)
+
+	gitDir, err := GitDir(f.dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	lock, err := Acquire(gitDir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer lock.Release()
+
+	withLock, err := Status(f.dir, "origin")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if withLock.State != StateAlreadyRunning {
+		t.Fatalf("status with held lock = %s, want %s", withLock.State, StateAlreadyRunning)
+	}
+
+	ignored, err := StatusWithOptions(StatusOptions{Dir: f.dir, Remote: "origin", IgnoreLock: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if ignored.State != StateReadyToExecute {
+		t.Fatalf("status ignoring lock = %s, want %s", ignored.State, StateReadyToExecute)
+	}
+}
+
 func TestStatusJSONIsStable(t *testing.T) {
 	f := newFixture(t)
 	f.setupAutonomous("TASK-0001", 1)
