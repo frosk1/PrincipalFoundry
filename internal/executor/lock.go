@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"syscall"
+	"time"
 )
 
 // ErrAlreadyRunning is returned when another live executor cycle holds the lock.
@@ -46,6 +47,27 @@ func Acquire(gitDir string) (*Lock, error) {
 		}
 	}
 	return &Lock{file: file}, nil
+}
+
+// AcquireWait tries to acquire the executor lock, retrying briefly while another
+// process holds it. It returns ErrAlreadyRunning when timeout elapses. This lets
+// a scheduled executor tick wait out a short no-op check by another supervisor
+// (for example an architect gate) instead of aborting the cycle.
+func AcquireWait(gitDir string, timeout time.Duration) (*Lock, error) {
+	deadline := time.Now().Add(timeout)
+	for {
+		lock, err := Acquire(gitDir)
+		if err == nil {
+			return lock, nil
+		}
+		if !errors.Is(err, ErrAlreadyRunning) {
+			return nil, err
+		}
+		if !time.Now().Before(deadline) {
+			return nil, ErrAlreadyRunning
+		}
+		time.Sleep(250 * time.Millisecond)
+	}
 }
 
 // Held reports whether another process currently holds the executor lock. It

@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 )
 
 func TestAcquireAndRelease(t *testing.T) {
@@ -53,6 +54,37 @@ func TestAcquireIgnoresAbandonedLockFile(t *testing.T) {
 		t.Fatalf("expected an abandoned lock file to be reusable, got %v", err)
 	}
 	lock.Release()
+}
+
+func TestAcquireWaitSucceedsAfterShortRelease(t *testing.T) {
+	gitDir := t.TempDir()
+	lock, err := Acquire(gitDir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	go func() {
+		time.Sleep(300 * time.Millisecond)
+		lock.Release()
+	}()
+
+	got, err := AcquireWait(gitDir, 2*time.Second)
+	if err != nil {
+		t.Fatalf("expected to acquire after the short holder released: %v", err)
+	}
+	got.Release()
+}
+
+func TestAcquireWaitTimesOut(t *testing.T) {
+	gitDir := t.TempDir()
+	lock, err := Acquire(gitDir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer lock.Release()
+
+	if _, err := AcquireWait(gitDir, 400*time.Millisecond); !errors.Is(err, ErrAlreadyRunning) {
+		t.Fatalf("expected ErrAlreadyRunning after timeout, got %v", err)
+	}
 }
 
 func TestHeldFalseWithoutLock(t *testing.T) {

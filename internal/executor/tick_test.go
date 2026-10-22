@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 )
 
 func noopRunner(calls *int) Runner {
@@ -160,7 +161,7 @@ func TestTickReportsAlreadyRunning(t *testing.T) {
 	defer lock.Release()
 
 	calls := 0
-	result, err := Tick(context.Background(), TickConfig{Dir: f.dir, Runner: noopRunner(&calls), Stdout: io.Discard})
+	result, err := Tick(context.Background(), TickConfig{Dir: f.dir, Runner: noopRunner(&calls), Stdout: io.Discard, LockWait: 10 * time.Millisecond})
 	if err != nil {
 		t.Fatal(err)
 	}

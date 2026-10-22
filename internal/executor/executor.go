@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"strings"
+	"time"
 )
 
 // Outcome is the concise result of one executor cycle.
@@ -86,6 +87,9 @@ type TickConfig struct {
 	Attach   string
 	Model    string
 	Auto     bool
+	// LockWait bounds how long a cycle waits for a concurrent lock holder.
+	// Zero uses the default (5 seconds).
+	LockWait time.Duration
 	Runner   Runner
 	Stdout   io.Writer
 	Stderr   io.Writer
@@ -133,7 +137,13 @@ func Tick(ctx context.Context, cfg TickConfig) (TickResult, error) {
 		return fail(err)
 	}
 
-	lock, err := Acquire(gitDir)
+	// Wait briefly for a short-lived holder (for example an architect gate
+	// checking state) so a timer collision does not starve the executor.
+	lockWait := cfg.LockWait
+	if lockWait <= 0 {
+		lockWait = 5 * time.Second
+	}
+	lock, err := AcquireWait(gitDir, lockWait)
 	if errors.Is(err, ErrAlreadyRunning) {
 		return TickResult{Outcome: OutcomeAlreadyRunning, State: StateAlreadyRunning, Message: "an executor cycle is already running"}, nil
 	}

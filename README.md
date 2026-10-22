@@ -538,6 +538,8 @@ The scheduler and the executor never coordinate directly. The architect commits 
 
 Each cycle takes a lock in the repository's Git directory (never committed to Git). It prevents overlapping timer runs, a timer run during a manual tick, and concurrent manual ticks. The lock uses an advisory file lock, so it is released automatically if a process crashes or the machine reboots.
 
+A cycle waits up to five seconds for a concurrent short-lived holder before reporting `ALREADY_RUNNING`. This lets a scheduled tick survive a brief no-op check by another supervisor (for example an architect gate) instead of being starved when two timers fire at the same moment.
+
 ## Lifecycle
 
 The overall process moves through explicit phases:
