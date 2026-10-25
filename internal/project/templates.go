@@ -63,11 +63,11 @@ For exactly one active task:
 4. Ask the tester subagent for a PREFLIGHT assessment when available.
 5. Establish a baseline by running the smallest relevant existing build/tests before changing behavior.
 6. Implement only the active task.
-7. Run targeted tests during implementation and use actual failures as feedback.
-8. Run every verification gate required by .factory/CURRENT_TASK.md.
+7. Run focused tests and relevant negative controls during implementation; use actual failures as feedback.
+8. Prepare the mandatory gate plan and run pre-review verification needed for tester/reviewer assessment. Avoid automatically repeating expensive full suites at every handoff.
 9. Ask the tester subagent for a FINAL assessment.
 10. Ask the reviewer subagent for an independent review.
-11. Run deterministic final verification after agent review where a verification command or script exists.
+11. Run deterministic final verification after agent review: ensure every gate required by .factory/CURRENT_TASK.md passes on the final reviewed tree. Repeat gates if code or tests changed since their last valid run; attribute any reusable unchanged-tree evidence accurately and obey task-specific rerun requirements.
 12. Update the PrincipalFoundry evidence files.
 13. Commit only when the task completion conditions are satisfied.
 
@@ -102,6 +102,14 @@ Use real ephemeral infrastructure for owned dependencies when practical. Mock th
 Never weaken, delete, skip, or rewrite tests merely to make an implementation pass.
 
 Do not modify a verification harness or quality gate merely to obtain a green result. Changes to verification infrastructure must be explicitly in task scope.
+
+## Efficient verification without weaker gates
+
+At PREFLIGHT, identify focused feedback tests, expensive fixtures and deliberate timeout/stall tests, and any known test runtimes. Coordinate executor/tester ownership: the tester independently challenges critical behavior and may rerun focused tests or fault controls, but should not automatically repeat every lengthy full suite solely to duplicate the executor. The executor remains responsible for every task-required verification gate and complete final-tree evidence.
+
+Prefer project-declared, deterministic verification commands. An optimized or sharded runner may satisfy a mandatory gate only when the active task or an approved repository contract explicitly establishes its equivalence; do not improvise a substitute for an exact required command. For sharded execution, require the same tests, tags, race mode, timing semantics and assertions; independently discover the inventory, prove exactly-once assignment (no missing, duplicate or extra tests), fail if any shard fails or unexpectedly skips, and isolate concurrent temporary files, databases and ports. Do not shorten production deadlines just to accelerate tests.
+
+Record actual command, runner/version where relevant, tree identity, executor, exit status, elapsed time and coverage evidence for costly gates. If runtime is unexpectedly high, distinguish deliberate waits from fixture overhead before recommending changes. No performance investigation authorizes unrelated harness edits or relaxation of gate requirements.
 
 ## Evidence files
 
@@ -281,9 +289,11 @@ Determine:
 - regression risks;
 - negative, boundary, error, and concurrency cases worth testing;
 - required integration/API/E2E setup implied by the task;
-- the smallest useful baseline commands to run.
+- the smallest useful baseline commands to run;
+- expensive fixtures or intentional timing tests, known runtimes, and the project's required gate commands or approved runner;
+- which checks the tester should independently run versus which full gates the executor must prove on the final tree.
 
-Do not prescribe an unnecessarily large test suite. Focus on tests that can falsify the intended change.
+Do not prescribe an unnecessarily large test suite. Focus on tests that can falsify the intended change. Do not trade away mandatory gates for quick feedback.
 
 Return a concise preflight plan with:
 
@@ -292,6 +302,7 @@ Return a concise preflight plan with:
 - TEST_SCENARIOS
 - REGRESSION_RISKS
 - REQUIRED_ENVIRONMENT
+- TEST_EXECUTION_PLAN (focused checks, expensive gates, role ownership)
 
 ### FINAL
 
@@ -299,14 +310,14 @@ Run after implementation.
 
 1. Inspect the actual diff and resulting behavior.
 2. Check every acceptance criterion that can be objectively tested.
-3. Run targeted existing tests.
+3. Independently run targeted existing tests and high-risk negative controls.
 4. Add or request missing tests when important behavior is not covered.
 5. Exercise negative, boundary, malformed-input, failure-path, and regression scenarios relevant to the change.
-6. Run the task's required verification gates that fall within tester capability.
-7. Report exact commands and meaningful outcomes.
+6. Inspect the executor's mandatory full-gate evidence and independently run full gates when the task assigns them to the tester or a critical verification risk demands it. Do not automatically duplicate every expensive suite or count an unexecuted gate as tester-run.
+7. Report exact commands, relevant elapsed durations, who ran each check, and meaningful outcomes.
 8. Separate implementation defects from environment/infrastructure failures.
 
-Do not accept the implementer's report as proof. Verify independently where possible.
+Do not accept the implementer's report as proof. Verify independently where possible. For costly tests, distinguish deliberate timeout/backpressure waits from fixture overhead. Use a project-approved sharded runner only when its test inventory, timing, execution flags and fail-closed aggregation are demonstrably equivalent to the required gate. Never unilaterally shorten test deadlines, skip tests, or reclassify a mandatory full gate as optional.
 
 ## Critical invariants and falsifiability
 
@@ -347,7 +358,7 @@ List the task behaviors and acceptance criteria actually exercised.
 
 ### COMMANDS_AND_RESULTS
 
-List relevant commands, exit status, and concise observed results.
+List relevant commands, exit status, observed duration when available, who actually ran them, and concise observed results. Attribute executor-only mandatory gates to the executor rather than claiming to have repeated them.
 
 ### BLOCKING_FINDINGS
 
@@ -432,6 +443,7 @@ Review the change for:
 - Are important negative or regression cases absent?
 - Do tester and deterministic verification results support the claimed completion?
 - Has any test or quality gate been weakened?
+- If an optimized runner is used, is equivalence to the required gate established (including discovery, sharding, skips, modes and failures), rather than merely inferred from a green summary?
 
 ## Independent counterexample review
 

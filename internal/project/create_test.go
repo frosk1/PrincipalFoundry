@@ -99,6 +99,54 @@ func TestCreateGeneratesAdvancedAgentContracts(t *testing.T) {
 	}
 }
 
+func TestCreateGeneratesCostAwareVerificationGuidance(t *testing.T) {
+	cases := []struct {
+		executor   string
+		testerPath string
+		reviewPath string
+	}{
+		{"opencode", ".opencode/agents/tester.md", ".opencode/agents/reviewer.md"},
+		{"claude-code", ".claude/agents/tester.md", ".claude/agents/reviewer.md"},
+		{"codex", ".codex/agents/tester.toml", ".codex/agents/reviewer.toml"},
+	}
+	for _, tc := range cases {
+		t.Run(tc.executor, func(t *testing.T) {
+			root, err := Create(Config{Name: "demo", Architect: "chatgpt", Executor: tc.executor, ParentDir: t.TempDir()})
+			if err != nil {
+				t.Fatal(err)
+			}
+			agents := readGeneratedFile(t, root, "AGENTS.md")
+			for _, marker := range []string{
+				"## Efficient verification without weaker gates",
+				"an approved repository contract explicitly establishes its equivalence",
+				"prove exactly-once assignment",
+				"Do not shorten production deadlines",
+				"every gate required by .factory/CURRENT_TASK.md passes",
+			} {
+				if !strings.Contains(agents, marker) {
+					t.Errorf("AGENTS.md missing efficient-verification marker %q", marker)
+				}
+			}
+			tester := readGeneratedFile(t, root, tc.testerPath)
+			for _, marker := range []string{
+				"TEST_EXECUTION_PLAN",
+				"Independently run targeted existing tests",
+				"Do not automatically duplicate every expensive suite",
+				"Never unilaterally shorten test deadlines",
+				"who actually ran them",
+			} {
+				if !strings.Contains(tester, marker) {
+					t.Errorf("%s missing efficiency marker %q", tc.testerPath, marker)
+				}
+			}
+			reviewer := readGeneratedFile(t, root, tc.reviewPath)
+			if !strings.Contains(reviewer, "equivalence to the required gate") {
+				t.Errorf("%s missing optimized-runner equivalence check", tc.reviewPath)
+			}
+		})
+	}
+}
+
 func TestCreateGeneratesExecutorEvidenceContract(t *testing.T) {
 	root, err := Create(Config{Name: "demo", Architect: "chatgpt", Executor: "opencode", ParentDir: t.TempDir()})
 	if err != nil {
