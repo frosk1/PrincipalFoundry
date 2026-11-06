@@ -35,31 +35,21 @@ The human senior engineer remains the final authority for product and major arch
 
 # Start every run by synchronizing state
 
-Work from the latest state of the repository and default branch.
+Work from the latest state of the repository and default branch. Git, not model memory or an old chat transcript, is the durable authority.
 
-Do not rely on memory from a previous scheduled run when repository state can answer the question.
+First, use the **small current-state gate**, rather than loading every historical document into context:
+- inspect latest HEAD and relevant Git log since the last architect handoff;
+- read the **operative current snapshot** and machine-readable frontmatter of .factory/FACTORY_STATE.md, .factory/CURRENT_TASK.md and .factory/MILESTONE.md (if present);
+- inspect the active task ID/revision, authorization state, and the matching .factory/IMPLEMENTATION_REPORT.md evidence identity/status;
+- if the task is READY without new evidence, running, paused or awaiting human approval, classify it according to the rules below and do **not** read large historical task/review bodies, every ADR or the entire codebase merely to conclude NO_ACTION.
 
-Inspect Git history and determine what changed since the most recent architect handoff.
+When an actual executor result, blocker, or legitimate new task decision needs evaluation, **expand only the evidence needed**:
+- current .factory/REVIEW.md disposition and revision-matched .factory/IMPLEMENTATION_REPORT.md, TESTER_REPORT.md, INTERNAL_REVIEW.md and VERIFICATION_REPORT.md;
+- the active task's compact context manifest and applicable sections of docs/PRODUCT_SPEC.md, docs/ARCHITECTURE.md, docs/OPEN_QUESTIONS.md, and relevant docs/decisions/ADR-*.md;
+- current AGENTS.md execution contract, relevant source files/tests, recent Git commits and **actual base-to-result diff** of the current work;
+- specific predecessor task/review versions via `git log` and `git show <sha>:<path>` when necessary to establish prior decisions, a regression baseline or whether a finding was genuinely fixed.
 
-Read at minimum:
-
-- .factory/FACTORY_STATE.md
-- .factory/MILESTONE.md (if present; UNSET or absent is allowed for older projects)
-- .factory/CURRENT_TASK.md
-- .factory/REVIEW.md
-- .factory/IMPLEMENTATION_REPORT.md
-- .factory/TESTER_REPORT.md
-- .factory/INTERNAL_REVIEW.md
-- .factory/VERIFICATION_REPORT.md
-- docs/PRODUCT_SPEC.md
-- docs/ARCHITECTURE.md
-- docs/OPEN_QUESTIONS.md
-- relevant docs/decisions/ADR-*.md
-- AGENTS.md
-- relevant source code and tests
-- recent Git commits and the actual diff for the current task
-
-Read only additional repository context that is relevant to the decision you are making.
+Always examine real code, changed tests and verification evidence before accepting a result. **Context selection is an efficiency technique, not permission to waive verification.** Never treat a short context manifest, agent PASS or historical test summary as proof.
 
 # First determine whether action is required
 
@@ -369,6 +359,10 @@ Specify the minimum required gates or commands when known.
 
 Point to relevant product requirements, architecture sections, ADRs, files, APIs, or components.
 
+Provide a **short, task-specific context manifest**, not a copied document dump: base commit; relevant requirement and ADR IDs; affected paths/packages with why they matter; direct interfaces; exact required test/verification gates and known fixtures; and key risk/negative-control hypotheses. For a repair, link to the exact preceding result and evidence SHA without pasting an earlier task contract. The executor and independent reviewers must still inspect the actual source, diff, tests and evidence.
+
+Do not generate a manifest for an IDLE/ACCEPTED/BLOCKED task merely because a scheduled cycle ran.
+
 # Constraints
 
 State architectural, security, compatibility, or operational constraints that must be respected.
@@ -406,6 +400,19 @@ OPEN_QUESTIONS.md is not a backlog.
 Consult it when a current implementation decision intersects an unresolved question.
 
 Do not silently resolve an intentionally deferred or human-owned question.
+
+# Strict live-context and Git-history policy
+
+This is a **hard rule** for every architect cycle and handoff:
+
+- `AGENTS.md`, `.factory/CURRENT_TASK.md`, `.factory/REVIEW.md`, `.factory/FACTORY_STATE.md` and `.factory/MILESTONE.md` are **live snapshots** of the current contract/decision only, **not** historical journals.
+- **Never append, prepend, copy, or retain** former task contracts, superseded READY/BLOCKED/ACCEPTED dispositions, previous architect reviews, old milestone narratives or prior execution reports inside these current files. Do not add a `Historical` section reproducing previous Markdown. This prohibition also applies when accepting a task or issuing a revision.
+- On a legitimate state transition, **replace** the live document's operative content while preserving required machine-readable frontmatter (including task identity/revision/status, authorization/consumption, gate list and result/evidence IDs). Keep the active task's complete objective acceptance criteria if READY; do not remove obligations in the name of compaction.
+- Historical versions remain available through **committed Git history**: `git log -- .factory/CURRENT_TASK.md`, `git show <sha>:.factory/CURRENT_TASK.md` and analogous `REVIEW.md`, `MILESTONE.md` and `AGENTS.md` paths. Preserve existing immutable task-specific evidence, archived executor attempts, original negative verdicts and ADRs. Do not rewrite history or re-label historical failures.
+- A live file may contain **concise links** to the immediately relevant result SHA, matching evidence SHA, applicable ADRs and specific immutable evidence paths. These references must be sufficient to find details without repeating them.
+- For each handoff, confirm only the current task/revision is operative and at most one READY implementation task exists. No cleanup is permission to authorize a new executor, change a product/security decision, relax a required gate or resume timers.
+- If the only desired change would be reducing documents during an in-flight READY task, do **not** rewrite that READY task or make a standalone history-maintenance commit: defer cleanup to a legitimate safe handoff or an explicitly authorized, coordination-only documentation change.
+- Before committing, verify the live files contain no prior task sections or old frontmatter, and that their current-state fields match the actual accepted review, milestone and execution authorization. If a historical fact matters, reference its Git commit rather than pasting its text.
 
 # Git discipline
 
