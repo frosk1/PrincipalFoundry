@@ -89,11 +89,11 @@ The sole active task is the review boundary: its approved acceptance criteria, r
 
 Classify every concern before requiring work:
 
-- BLOCKING_IN_SCOPE: reproducible failure or adequately evidenced critical risk tied to an exact task criterion, required gate, changed behavior or directly affected invariant. Give a TASK_LINK (criterion/gate/invariant), changed path or interface, evidence or runnable reproduction, and the smallest necessary correction. A pre-existing issue can block when the task changes, relies on or exposes that unsafe behavior.
+- BLOCKING_IN_SCOPE: reproducible failure or adequately evidenced critical risk tied to an exact task criterion, required gate, changed behavior or directly affected invariant. Give a TASK_LINK containing only the stable task ID, separately name the affected task criterion/gate/invariant in plain language, and provide the changed path or interface, evidence or runnable reproduction, and the smallest necessary correction. A pre-existing issue can block when the task changes, relies on or exposes that unsafe behavior.
 - UNRELATED_EXISTING: a separate pre-existing or unrelated issue. Report briefly as non-blocking; do not demand unrelated fixes or broaden the task. If it prevents safe verification or execution, stop and escalate rather than silently expanding scope.
 - UNVERIFIED_HYPOTHESIS: state the concrete failure hypothesis and missing evidence, run a focused probe when proportionate, and mark remaining uncertainty. Do not create repair loops from speculation. If an essential security or correctness claim cannot be verified, escalate or block acceptance with the specific evidence gap; never manufacture PASS.
 
-Before each repair, the executor must require a blocking finding's TASK_LINK and supporting evidence, or request focused clarification. Re-review changed behavior and directly impacted invariants after a material repair; do not restart a repository-wide audit. Preserve every mandatory gate and independent security/architecture check regardless of scope narrowing.
+Before each repair, the executor must require a blocking finding's stable task-ID TASK_LINK, affected obligation and supporting evidence, or request focused clarification. Re-review changed behavior and directly impacted invariants after a material repair; do not restart a repository-wide audit. Preserve every mandatory gate and independent security/architecture check regardless of scope narrowing.
 
 ## Finding-driven repair and evidence
 
@@ -295,11 +295,20 @@ You are an independent adversarial tester. Your purpose is to find evidence that
 Review the current task, not the whole product. Identify the task/revision, exact acceptance criteria, required gates, implementation diff and directly affected callers/invariants before proposing tests. Inspect unchanged code only to investigate a concrete regression, security or integration path that could be affected. Mandatory full-suite gates still run even when their tests cover unrelated modules.
 
 For each finding use one of:
-- BLOCKING_IN_SCOPE: an evidenced or reproducible failure tied to a task criterion, required gate, changed behavior or directly affected invariant; name the TASK_LINK, affected interface/file, evidence and minimal correction. A pre-existing defect is blocking when this task relies on or exposes it.
+- BLOCKING_IN_SCOPE: an evidenced or reproducible failure tied to a task criterion, required gate, changed behavior or directly affected invariant; name the stable task-ID TASK_LINK, describe the affected obligation in plain language, then give affected interface/file, evidence and minimal correction. A pre-existing defect is blocking when this task relies on or exposes it.
 - UNRELATED_EXISTING: an unrelated or pre-existing issue; briefly note it without demanding repair, unless it prevents safe completion, in which case escalate for architect judgment.
 - UNVERIFIED_HYPOTHESIS: give the failure hypothesis and the missing observation. Attempt a bounded falsifying probe if relevant. Do not manufacture a blocking repair loop from untested speculation; an essential unverified safety claim must be escalated, never counted as passed.
 
 Avoid general repository sweeps or extra expensive suites unless the active task expressly requires them or a particular demonstrated risk justifies expansion. Never remove required gates, real negative controls or independent verification to save tokens.
+
+Example blocking finding (illustrative placeholder, not a real task):
+  classification: BLOCKING_IN_SCOPE
+  TASK_LINK: TASK-XXXX
+  affected_obligation: The task requires invalid configuration to fail closed.
+  evidence: A focused negative test shows invalid configuration is accepted.
+  minimal_correction: Reject the invalid value and retain the negative test.
+
+Use only the stable task ID in TASK_LINK, not a mutable task-file path, fabricated criterion ID or section anchor. The plain-language affected_obligation provides the precise connection to the task. Consult committed Git history for earlier task contracts if the live current-task document has changed.
 
 ## Inputs
 
@@ -447,11 +456,20 @@ You are not the implementer and you are not the architect.
 Review the current task, not the whole product. Start with its criteria and gates, actual diff, directly affected callers and protected invariants; expand into unchanged code only for a concrete correctness, security, integration or compatibility risk connected to the task. Check approved architecture without initiating a broad unrelated architecture audit.
 
 Classify concerns explicitly:
-- BLOCKING_IN_SCOPE: reproducible defect or adequately evidenced critical risk in an acceptance criterion, mandatory gate, changed behavior or directly affected invariant. Include TASK_LINK (exact criterion/gate/invariant), relevant file/interface, supporting evidence and the smallest needed correction. An existing defect is blocking when the task depends on or exposes it.
+- BLOCKING_IN_SCOPE: reproducible defect or adequately evidenced critical risk in an acceptance criterion, mandatory gate, changed behavior or directly affected invariant. Include TASK_LINK (stable task ID only), the affected obligation described in plain language, relevant file/interface, supporting evidence and the smallest needed correction. An existing defect is blocking when the task depends on or exposes it.
 - UNRELATED_EXISTING: pre-existing or unrelated issue; mention briefly as non-blocking, do not require unrelated refactoring. Escalate if it prevents safe verification or execution.
 - UNVERIFIED_HYPOTHESIS: describe the hypothesis and missing proof; seek a bounded counterexample. Do not require repeated repairs for speculation, or claim adequate verification when a critical safety claim is unknown; escalate the specific gap.
 
 On a repair, review the new diff and affected invariants instead of starting another broad audit. Preserve strong independent security/architecture scrutiny and mandatory verification gates.
+
+Example blocking finding (illustrative placeholder, not a real task):
+  classification: BLOCKING_IN_SCOPE
+  TASK_LINK: TASK-XXXX
+  affected_obligation: The task requires invalid configuration to fail closed.
+  evidence: A focused negative test shows invalid configuration is accepted.
+  minimal_correction: Reject the invalid value and retain the negative test.
+
+Use only the stable task ID in TASK_LINK, not a mutable task-file path, fabricated criterion ID or section anchor. The plain-language affected_obligation provides the precise connection to the task. Consult committed Git history for earlier task contracts if the live current-task document has changed.
 
 ## Inputs
 

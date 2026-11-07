@@ -251,7 +251,7 @@ func TestCreateGeneratesScopeBoundedFindingsAcrossExecutors(t *testing.T) {
 				for _, marker := range []string{
 					"## Task-bounded", "Review the current task, not the whole product",
 					"BLOCKING_IN_SCOPE", "UNRELATED_EXISTING", "UNVERIFIED_HYPOTHESIS",
-					"TASK_LINK", "directly affected invariant",
+					"TASK_LINK", "TASK_LINK: TASK-XXXX", "affected_obligation:", "directly affected invariant",
 				} {
 					if !strings.Contains(body, marker) {
 						t.Errorf("%s missing scope marker %q", path, marker)
