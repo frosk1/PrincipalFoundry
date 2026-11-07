@@ -220,6 +220,48 @@ func TestCreateRejectsInvalidSubagentModelOverrides(t *testing.T) {
 	}
 }
 
+func TestCreateGeneratesScopeBoundedFindingsAcrossExecutors(t *testing.T) {
+	cases := []struct {
+		executor string
+		tester   string
+		reviewer string
+	}{
+		{"opencode", ".opencode/agents/tester.md", ".opencode/agents/reviewer.md"},
+		{"claude-code", ".claude/agents/tester.md", ".claude/agents/reviewer.md"},
+		{"codex", ".codex/agents/tester.toml", ".codex/agents/reviewer.toml"},
+	}
+	for _, tc := range cases {
+		t.Run(tc.executor, func(t *testing.T) {
+			root, err := Create(Config{Name: "demo", Executor: tc.executor, ParentDir: t.TempDir()})
+			if err != nil {
+				t.Fatal(err)
+			}
+			agents := readGeneratedFile(t, root, "AGENTS.md")
+			for _, marker := range []string{
+				"## Scope-bound independent verification",
+				"BLOCKING_IN_SCOPE", "UNRELATED_EXISTING", "UNVERIFIED_HYPOTHESIS",
+				"TASK_LINK", "Preserve every mandatory gate",
+			} {
+				if !strings.Contains(agents, marker) {
+					t.Errorf("AGENTS.md missing scope marker %q", marker)
+				}
+			}
+			for _, path := range []string{tc.tester, tc.reviewer} {
+				body := readGeneratedFile(t, root, path)
+				for _, marker := range []string{
+					"## Task-bounded", "Review the current task, not the whole product",
+					"BLOCKING_IN_SCOPE", "UNRELATED_EXISTING", "UNVERIFIED_HYPOTHESIS",
+					"TASK_LINK", "directly affected invariant",
+				} {
+					if !strings.Contains(body, marker) {
+						t.Errorf("%s missing scope marker %q", path, marker)
+					}
+				}
+			}
+		})
+	}
+}
+
 func TestCreateGeneratesExecutorEvidenceContract(t *testing.T) {
 	root, err := Create(Config{Name: "demo", Architect: "chatgpt", Executor: "opencode", ParentDir: t.TempDir()})
 	if err != nil {

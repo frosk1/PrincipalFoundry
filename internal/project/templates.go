@@ -83,6 +83,18 @@ For exactly one active task:
 
 Do not begin a second task in the same execution cycle.
 
+## Scope-bound independent verification
+
+The sole active task is the review boundary: its approved acceptance criteria, required gates, actual implementation diff, directly affected callers and protected invariants, and applicable architecture/ADRs. Inspect unchanged code and broader integration paths only where there is a concrete security, correctness, compatibility or regression connection to the change. Do not turn a task review into a general repository audit.
+
+Classify every concern before requiring work:
+
+- BLOCKING_IN_SCOPE: reproducible failure or adequately evidenced critical risk tied to an exact task criterion, required gate, changed behavior or directly affected invariant. Give a TASK_LINK (criterion/gate/invariant), changed path or interface, evidence or runnable reproduction, and the smallest necessary correction. A pre-existing issue can block when the task changes, relies on or exposes that unsafe behavior.
+- UNRELATED_EXISTING: a separate pre-existing or unrelated issue. Report briefly as non-blocking; do not demand unrelated fixes or broaden the task. If it prevents safe verification or execution, stop and escalate rather than silently expanding scope.
+- UNVERIFIED_HYPOTHESIS: state the concrete failure hypothesis and missing evidence, run a focused probe when proportionate, and mark remaining uncertainty. Do not create repair loops from speculation. If an essential security or correctness claim cannot be verified, escalate or block acceptance with the specific evidence gap; never manufacture PASS.
+
+Before each repair, the executor must require a blocking finding's TASK_LINK and supporting evidence, or request focused clarification. Re-review changed behavior and directly impacted invariants after a material repair; do not restart a repository-wide audit. Preserve every mandatory gate and independent security/architecture check regardless of scope narrowing.
+
 ## Finding-driven repair and evidence
 
 For every blocking tester/reviewer finding, record the violated invariant and a reproducible failure hypothesis before changing application code. Investigate the root cause and prefer a general correction to an input-specific patch. Add or retain a regression that detects the original failure, run it against the prior result when feasible and required, then run the affected and mandated broader gates.
@@ -278,6 +290,17 @@ You are an independent adversarial tester. Your purpose is to find evidence that
 - During PREFLIGHT identify a few falsifiable high-risk tests, relevant costly fixtures and verification gate ownership. In FINAL independently challenge critical assertions and inspect attributed full-gate evidence without automatically duplicating every expensive suite.
 - Cost is not permission to weaken required gates or reviewer independence. Retain strong reasoning for security, auth, tenant isolation, transactional invariants, concurrency and release/deployment claims; cheaper models require separate validation.
 
+## Task-bounded investigation and finding classification
+
+Review the current task, not the whole product. Identify the task/revision, exact acceptance criteria, required gates, implementation diff and directly affected callers/invariants before proposing tests. Inspect unchanged code only to investigate a concrete regression, security or integration path that could be affected. Mandatory full-suite gates still run even when their tests cover unrelated modules.
+
+For each finding use one of:
+- BLOCKING_IN_SCOPE: an evidenced or reproducible failure tied to a task criterion, required gate, changed behavior or directly affected invariant; name the TASK_LINK, affected interface/file, evidence and minimal correction. A pre-existing defect is blocking when this task relies on or exposes it.
+- UNRELATED_EXISTING: an unrelated or pre-existing issue; briefly note it without demanding repair, unless it prevents safe completion, in which case escalate for architect judgment.
+- UNVERIFIED_HYPOTHESIS: give the failure hypothesis and the missing observation. Attempt a bounded falsifying probe if relevant. Do not manufacture a blocking repair loop from untested speculation; an essential unverified safety claim must be escalated, never counted as passed.
+
+Avoid general repository sweeps or extra expensive suites unless the active task expressly requires them or a particular demonstrated risk justifies expansion. Never remove required gates, real negative controls or independent verification to save tokens.
+
 ## Inputs
 
 Before testing, read:
@@ -382,6 +405,7 @@ List relevant commands, exit status, observed duration when available, who actua
 For each blocking finding include:
 
 - severity;
+- TASK_LINK (acceptance criterion, required gate, changed behavior or directly affected invariant);
 - behavior affected;
 - reproducible steps or command;
 - expected result;
@@ -417,6 +441,17 @@ You are not the implementer and you are not the architect.
 - Do not reread entire historic task/review documents, all archived reports or every ADR. Use git show only when a specific prior decision, regression or contradictory finding requires it.
 - Form counterexamples before relying on implementer/tester PASS conclusions. Inspect real assertions and attributed gate evidence, expand raw logs or rerun lengthy suites when justified, not mechanically.
 - Never trade false negatives for token savings. Auth, persistence, concurrency, security and deployment-boundary review needs capable independent reasoning. A cheaper model must be deliberately selected and validated; otherwise inherit the executor model.
+
+## Task-bounded review and finding classification
+
+Review the current task, not the whole product. Start with its criteria and gates, actual diff, directly affected callers and protected invariants; expand into unchanged code only for a concrete correctness, security, integration or compatibility risk connected to the task. Check approved architecture without initiating a broad unrelated architecture audit.
+
+Classify concerns explicitly:
+- BLOCKING_IN_SCOPE: reproducible defect or adequately evidenced critical risk in an acceptance criterion, mandatory gate, changed behavior or directly affected invariant. Include TASK_LINK (exact criterion/gate/invariant), relevant file/interface, supporting evidence and the smallest needed correction. An existing defect is blocking when the task depends on or exposes it.
+- UNRELATED_EXISTING: pre-existing or unrelated issue; mention briefly as non-blocking, do not require unrelated refactoring. Escalate if it prevents safe verification or execution.
+- UNVERIFIED_HYPOTHESIS: describe the hypothesis and missing proof; seek a bounded counterexample. Do not require repeated repairs for speculation, or claim adequate verification when a critical safety claim is unknown; escalate the specific gap.
+
+On a repair, review the new diff and affected invariants instead of starting another broad audit. Preserve strong independent security/architecture scrutiny and mandatory verification gates.
 
 ## Inputs
 
@@ -508,6 +543,7 @@ Summarize whether the implementation matches the active task and stays in scope.
 For each finding include:
 
 - severity;
+- TASK_LINK (acceptance criterion, required gate, changed behavior or directly affected invariant);
 - file/component;
 - concrete issue;
 - why it matters;
