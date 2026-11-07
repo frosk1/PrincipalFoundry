@@ -23,6 +23,8 @@ type InitConfig struct {
 	Architect string
 	Executor  string
 	ParentDir string
+	TesterModel string
+	ReviewerModel string
 	// DesignDir is the approved design package produced by the discovery phase.
 	DesignDir string
 	// TaskFile, when set, is installed as the active .factory/CURRENT_TASK.md.
@@ -56,6 +58,8 @@ func CreateFromDesign(cfg InitConfig) (string, error) {
 		Architect: cfg.Architect,
 		Executor:  cfg.Executor,
 		ParentDir: cfg.ParentDir,
+		TesterModel: cfg.TesterModel,
+		ReviewerModel: cfg.ReviewerModel,
 	})
 	if err != nil {
 		return "", err

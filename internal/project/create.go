@@ -13,6 +13,8 @@ type Config struct {
 	Architect string
 	Executor  string
 	ParentDir string
+	TesterModel string // optional OpenCode provider/model[#variant]
+	ReviewerModel string // optional OpenCode provider/model[#variant]
 }
 
 var validName = regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9._-]*$`)
@@ -40,6 +42,9 @@ func prepare(cfg Config) (string, map[string]string, error) {
 		return "", nil, err
 	}
 	cfg.Executor = normalizedExecutor
+	if err := validateSubagentModels(cfg); err != nil {
+		return "", nil, err
+	}
 
 	if cfg.ParentDir == "" {
 		cfg.ParentDir = "."

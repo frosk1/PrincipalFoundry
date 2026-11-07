@@ -26,6 +26,20 @@ The architect agent supports the orchestrator by maintaining product and archite
 
 The human core stays intentionally small. The software factory is the execution system around it: the architect agent and execution agents work in a Git-native feedback loop, returning implementation evidence to the senior engineer instead of replacing senior engineering judgment.
 
+### Compact subagent context and optional model profiles
+
+New PrincipalFoundry projects generate scoped-context and cost-aware tester/reviewer instructions for OpenCode, Claude Code and Codex. Each subagent starts with the active task's Relevant context / manifest, then independently inspects actual code, diffs, tests, applicable ADRs and evidence. Old contracts/reviews stay retrievable via Git rather than accumulating in live Markdown. Required verification and review rigor are unchanged.
+
+OpenCode supports optional model/variant overrides at project creation:
+
+```bash
+pfoundry new my-project --executor opencode \
+  --tester-model provider/fast-model#low \
+  --reviewer-model provider/strong-model#high
+```
+
+The same flags work for `pfoundry init --from ...`. The names above are placeholders, **not hardcoded selections**; validate installed models and available reasoning variants for your provider. With flags omitted, both subagents inherit the executor model without downgrade. For security, authentication, concurrency, PostgreSQL and deployment reviews, retain a capable independently validated model. Override flags are currently supported for OpenCode only; Claude Code and Codex keep their native model configuration while receiving the same context-efficiency instructions.
+
 ## Agentic engineering model
 
 PrincipalFoundry combines three ideas: **human orchestration**, **harness engineering**, and a **Git-native software factory**.

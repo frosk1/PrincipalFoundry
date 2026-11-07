@@ -147,6 +147,79 @@ func TestCreateGeneratesCostAwareVerificationGuidance(t *testing.T) {
 	}
 }
 
+
+func TestCreateGeneratesScopedSubagentContextAcrossExecutors(t *testing.T) {
+	for _, tc := range []struct{ executor, testerPath, reviewerPath string }{
+		{"opencode", ".opencode/agents/tester.md", ".opencode/agents/reviewer.md"},
+		{"claude-code", ".claude/agents/tester.md", ".claude/agents/reviewer.md"},
+		{"codex", ".codex/agents/tester.toml", ".codex/agents/reviewer.toml"},
+	} {
+		t.Run(tc.executor, func(t *testing.T) {
+			root, err := Create(Config{Name: "demo", Executor: tc.executor, ParentDir: t.TempDir()})
+			if err != nil { t.Fatal(err) }
+			agents := readGeneratedFile(t, root, "AGENTS.md")
+			for _, marker := range []string{"## Compact current context and historical retrieval", "git show", "## Role-specific model and cost policy", "Relevant context / manifest"} {
+				if !strings.Contains(agents, marker) { t.Errorf("AGENTS.md missing %q", marker) }
+			}
+			for _, path := range []string{tc.testerPath, tc.reviewerPath} {
+				content := readGeneratedFile(t, root, path)
+				for _, marker := range []string{"## Scoped context and cost discipline", "git show", "Relevant context / manifest"} {
+					if !strings.Contains(content, marker) { t.Errorf("%s missing %q", path, marker) }
+				}
+			}
+		})
+	}
+}
+
+func TestCreateOpenCodeSubagentModelOverrides(t *testing.T) {
+	root, err := Create(Config{
+		Name: "demo", Executor: "opencode", ParentDir: t.TempDir(),
+		TesterModel: "provider/fast-model#low",
+		ReviewerModel: "openrouter/provider/strong-model#high",
+	})
+	if err != nil { t.Fatal(err) }
+	tester := readGeneratedFile(t, root, ".opencode/agents/tester.md")
+	reviewer := readGeneratedFile(t, root, ".opencode/agents/reviewer.md")
+	if !strings.Contains(tester, "mode: subagent\nmodel: provider/fast-model#low\n") {
+		t.Error("tester model override missing")
+	}
+	if !strings.Contains(reviewer, "mode: subagent\nmodel: openrouter/provider/strong-model#high\n") {
+		t.Error("reviewer model override missing")
+	}
+	for _, body := range []string{tester, reviewer} {
+		if strings.Count(body, "\nmodel: ") != 1 { t.Error("expected one model override") }
+	}
+}
+
+func TestCreateOpenCodeSubagentModelInheritanceByDefault(t *testing.T) {
+	root, err := Create(Config{Name: "demo", Executor: "opencode", ParentDir: t.TempDir()})
+	if err != nil { t.Fatal(err) }
+	for _, path := range []string{".opencode/agents/tester.md", ".opencode/agents/reviewer.md"} {
+		agent := readGeneratedFile(t, root, path)
+		frontmatter := strings.SplitN(agent, "---\n", 3)
+		if len(frontmatter) != 3 || strings.Contains(frontmatter[1], "model:") {
+			t.Errorf("%s should inherit executor model by default", path)
+		}
+	}
+}
+
+func TestCreateRejectsInvalidSubagentModelOverrides(t *testing.T) {
+	for _, tc := range []struct{ executor, tester, reviewer string }{
+		{"opencode", "provider/model\npermission: edit", ""},
+		{"opencode", "invalid-model-without-provider", ""},
+		{"opencode", "", "provider/model#"},
+		{"claude-code", "provider/model#low", ""},
+		{"codex", "", "provider/model#high"},
+		{"none", "", "provider/model#high"},
+	} {
+		_, err := Create(Config{
+			Name: "demo", Executor: tc.executor, ParentDir: t.TempDir(),
+			TesterModel: tc.tester, ReviewerModel: tc.reviewer,
+		})
+		if err == nil { t.Errorf("expected rejection: executor=%s tester=%q reviewer=%q", tc.executor, tc.tester, tc.reviewer) }
+	}
+}
+
 func TestCreateGeneratesExecutorEvidenceContract(t *testing.T) {
 	root, err := Create(Config{Name: "demo", Architect: "chatgpt", Executor: "opencode", ParentDir: t.TempDir()})
 	if err != nil {

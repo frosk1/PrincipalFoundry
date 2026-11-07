@@ -50,6 +50,8 @@ func runNew(args []string, stdout, stderr io.Writer) error {
 	architect := fs.String("architect", "chatgpt", "architect agent (for example: chatgpt, claude, none)")
 	executor := fs.String("executor", "opencode", "implementation agent (for example: opencode, codex, claude-code)")
 	outputDir := fs.String("dir", ".", "parent directory in which the project directory is created")
+	testerModel := fs.String("tester-model", "", "OpenCode tester provider/model#variant (default: inherit)")
+	reviewerModel := fs.String("reviewer-model", "", "OpenCode reviewer provider/model#variant (default: inherit)")
 
 	if len(args) == 0 {
 		return errors.New("usage: pfoundry new <project-name> [--architect chatgpt] [--executor opencode] [--dir .]")
@@ -67,6 +69,8 @@ func runNew(args []string, stdout, stderr io.Writer) error {
 		Architect: *architect,
 		Executor:  *executor,
 		ParentDir: *outputDir,
+		TesterModel: *testerModel,
+		ReviewerModel: *reviewerModel,
 	}
 
 	path, err := project.Create(cfg)
@@ -98,6 +102,8 @@ func runInit(args []string, stdout, stderr io.Writer) error {
 	outputDir := fs.String("dir", ".", "parent directory in which the project directory is created")
 	from := fs.String("from", "", "approved design package directory produced by the discovery phase")
 	task := fs.String("task", "", "optional first implementation task to activate as .factory/CURRENT_TASK.md")
+	testerModel := fs.String("tester-model", "", "OpenCode tester provider/model#variant (default: inherit)")
+	reviewerModel := fs.String("reviewer-model", "", "OpenCode reviewer provider/model#variant (default: inherit)")
 
 	if len(args) == 0 {
 		return errors.New("usage: pfoundry init <project-name> --from <design-package> [--architect chatgpt] [--executor opencode] [--task <task-file>] [--dir .]")
@@ -120,6 +126,8 @@ func runInit(args []string, stdout, stderr io.Writer) error {
 		ParentDir: *outputDir,
 		DesignDir: *from,
 		TaskFile:  *task,
+		TesterModel: *testerModel,
+		ReviewerModel: *reviewerModel,
 	}
 
 	path, err := project.CreateFromDesign(cfg)
@@ -296,8 +304,8 @@ func printUsage(w io.Writer) {
 	fmt.Fprintln(w, `PrincipalFoundry - bootstrap senior-led AI software teams
 
 Usage:
-  pfoundry new <project-name> [options]
-  pfoundry init <project-name> --from <design-package> [options]
+  pfoundry new <project-name> [--tester-model provider/model#variant] [--reviewer-model provider/model#variant] [options]
+  pfoundry init <project-name> --from <design-package> [--tester-model provider/model#variant] [--reviewer-model provider/model#variant] [options]
   pfoundry prompt architect-loop --repo <github-repository-url>
   pfoundry executor status [--json] [--ignore-lock] [--dir .] [--remote origin]
   pfoundry executor tick [--executor opencode] [--attach URL] [--model provider/model#variant] [--auto] [--dir .] [--remote origin] [--verbose]

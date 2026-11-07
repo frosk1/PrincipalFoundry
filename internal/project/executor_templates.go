@@ -2,6 +2,7 @@ package project
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
 )
 
@@ -9,6 +10,36 @@ const (
 	openCodeTesterPath   = ".opencode/agents/tester.md"
 	openCodeReviewerPath = ".opencode/agents/reviewer.md"
 )
+
+// OpenCode model syntax supports nested provider paths and an optional variant.
+// Restricting frontmatter values prevents YAML injection and accidental settings.
+var openCodeModelPattern = regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9._-]*(/[A-Za-z0-9._:-]+)+(#[A-Za-z0-9._-]+)?$`)
+
+func validateSubagentModels(cfg Config) error {
+	for _, role := range []struct{ name, model string }{
+		{"tester", cfg.TesterModel}, {"reviewer", cfg.ReviewerModel},
+	} {
+		model := strings.TrimSpace(role.model)
+		if model == "" {
+			continue
+		}
+		if cfg.Executor != "opencode" {
+			return fmt.Errorf("%s model override requires --executor opencode", role.name)
+		}
+		if !openCodeModelPattern.MatchString(model) {
+			return fmt.Errorf("invalid %s model %q: use provider/model[#variant]", role.name, model)
+		}
+	}
+	return nil
+}
+
+func withOpenCodeModel(content, model string) string {
+	model = strings.TrimSpace(model)
+	if model == "" {
+		return content // inherit executor model unchanged
+	}
+	return strings.Replace(content, "mode: subagent\n", "mode: subagent\nmodel: "+model+"\n", 1)
+}
 
 func normalizeExecutor(executor string) (string, error) {
 	switch strings.ToLower(strings.TrimSpace(executor)) {
@@ -25,16 +56,16 @@ func normalizeExecutor(executor string) (string, error) {
 	}
 }
 
-func applyExecutorTemplates(files map[string]string, executor string) map[string]string {
+func applyExecutorTemplates(files map[string]string, cfg Config) map[string]string {
 	tester := files[openCodeTesterPath]
 	reviewer := files[openCodeReviewerPath]
 	delete(files, openCodeTesterPath)
 	delete(files, openCodeReviewerPath)
 
-	switch executor {
+	switch cfg.Executor {
 	case "opencode":
-		files[openCodeTesterPath] = tester
-		files[openCodeReviewerPath] = reviewer
+		files[openCodeTesterPath] = withOpenCodeModel(tester, cfg.TesterModel)
+		files[openCodeReviewerPath] = withOpenCodeModel(reviewer, cfg.ReviewerModel)
 	case "claude-code":
 		files[".claude/agents/tester.md"] = claudeAgentMarkdown(
 			"tester",

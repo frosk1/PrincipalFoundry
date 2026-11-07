@@ -91,6 +91,23 @@ func TestCreateFromDesignInstallsApprovedDesign(t *testing.T) {
 	}
 }
 
+
+func TestCreateFromDesignConfiguresOpenCodeSubagentModels(t *testing.T) {
+	root, err := CreateFromDesign(InitConfig{
+		Name: "demo", Executor: "opencode", ParentDir: t.TempDir(),
+		DesignDir: newDesignPackage(t),
+		TesterModel: "provider/fast-model#low",
+		ReviewerModel: "provider/strong-model#high",
+	})
+	if err != nil { t.Fatal(err) }
+	if got := readGeneratedFile(t, root, ".opencode/agents/tester.md"); !strings.Contains(got, "model: provider/fast-model#low") {
+		t.Error("tester model not propagated")
+	}
+	if got := readGeneratedFile(t, root, ".opencode/agents/reviewer.md"); !strings.Contains(got, "model: provider/strong-model#high") {
+		t.Error("reviewer model not propagated")
+	}
+}
+
 func TestCreateFromDesignActivatesFirstTask(t *testing.T) {
 	design := newDesignPackage(t)
 	task := filepath.Join(design, "implementation", "TASK-0001-contract.md")

@@ -23,6 +23,12 @@ Use these sources in this order:
 
 If these sources conflict, do not silently choose one. Stop and report the conflict for architect resolution.
 
+## Compact current context and historical retrieval
+
+The active .factory/CURRENT_TASK.md, .factory/REVIEW.md, .factory/FACTORY_STATE.md, .factory/MILESTONE.md, and AGENTS.md are live snapshots, **not accumulating task histories**. On legitimate handoffs, replace superseded instructions and status, retaining required frontmatter, complete active acceptance criteria, verification gates and execution authorization. Use git log -- <path> and git show <sha>:<path> to retrieve former contracts/reviews. Preserve committed task-specific evidence and ADRs; never relabel original failures or copy historical task bodies into current files.
+
+Each new READY task should have a concise **Relevant context / manifest** listing its baseline commit; applicable requirement/ADR IDs; impacted paths/interfaces; exact verification gates and known fixtures; high-risk negative controls; and predecessor result/evidence SHAs only when a repair requires them. It is a navigation index, never proof. Read relevant current source/tests and actual diffs before conclusions. Do not bulk-read old reviews or every ADR without a specific reason.
+
 ## Authority boundary
 
 Implementation agents may make local implementation decisions that are consistent with the approved task and architecture.
@@ -48,6 +54,10 @@ Implementation work normally occurs only when:
 - .factory/CURRENT_TASK.md has status: READY.
 
 If the task is IDLE, BLOCKED, BLOCKED_HUMAN, or otherwise not ready, do not invent work.
+
+## Role-specific model and cost policy
+
+OpenCode tester/reviewer subagents inherit the executor model and reasoning variant unless separately and explicitly configured. Optional per-role provider/model#variant overrides are available during OpenCode project creation. Do not silently downgrade security, authentication, isolation, persistence, concurrency or deployment reviews. Validate cheaper options against known defects before adoption. Model selection never weakens mandatory tests or independent reviewer requirements.
 
 ## Execution cycle
 
@@ -261,6 +271,13 @@ mode: subagent
 
 You are an independent adversarial tester. Your purpose is to find evidence that an implementation does not satisfy its task, not to help the implementer declare success.
 
+## Scoped context and cost discipline
+
+- Start with the active task's **Relevant context / manifest**, then independently examine the exact source, diff, tests, relevant requirements/ADRs and actual evidence; the manifest itself is not proof.
+- Avoid bulk-reading historical CURRENT_TASK.md, REVIEW.md, AGENTS.md, old milestone states, archived attempts or every ADR. Use git show for an exact predecessor only when needed for a concrete failure hypothesis.
+- During PREFLIGHT identify a few falsifiable high-risk tests, relevant costly fixtures and verification gate ownership. In FINAL independently challenge critical assertions and inspect attributed full-gate evidence without automatically duplicating every expensive suite.
+- Cost is not permission to weaken required gates or reviewer independence. Retain strong reasoning for security, auth, tenant isolation, transactional invariants, concurrency and release/deployment claims; cheaper models require separate validation.
+
 ## Inputs
 
 Before testing, read:
@@ -394,6 +411,13 @@ You are the independent implementation reviewer. Default to read-only analysis. 
 
 You are not the implementer and you are not the architect.
 
+## Scoped context and cost discipline
+
+- Begin with the active task's **Relevant context / manifest**, exact baseline/result commits, implementation diff, changed tests and mandatory gate evidence. Independently expand into affected code and approved requirements/ADRs; summaries are not proof.
+- Do not reread entire historic task/review documents, all archived reports or every ADR. Use git show only when a specific prior decision, regression or contradictory finding requires it.
+- Form counterexamples before relying on implementer/tester PASS conclusions. Inspect real assertions and attributed gate evidence, expand raw logs or rerun lengthy suites when justified, not mechanically.
+- Never trade false negatives for token savings. Auth, persistence, concurrency, security and deployment-boundary review needs capable independent reasoning. A cheaper model must be deliberately selected and validated; otherwise inherit the executor model.
+
 ## Inputs
 
 Read:
@@ -515,7 +539,7 @@ Return ARCHITECT_DECISION_REQUIRED when resolving the issue would require changi
 The reviewer does not provide final product acceptance. The architect/human layer owns that decision.
 `,
 	}
-	return applyExecutorTemplates(files, cfg.Executor)
+	return applyExecutorTemplates(files, cfg)
 }
 
 // factoryStateContent renders the factory state control file for a lifecycle phase.
