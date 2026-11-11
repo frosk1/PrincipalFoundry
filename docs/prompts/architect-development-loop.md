@@ -33,6 +33,12 @@ For each run:
 
 The human senior engineer remains the final authority for product and major architectural decisions.
 
+# Security ownership boundary for planning and reviews
+
+Keep security review focused on behavior the project owns: application code, authentication/authorization, credentials, project-generated configuration/manifests, deployment packaging and interfaces to supported dependencies. For third-party infrastructure such as Kubernetes, CNI plugins, container runtimes, databases and brokers, assess whether the project **uses and configures their documented security contracts correctly**. Focused allow/deny, identity, endpoint and lifecycle smoke tests in a supported disposable environment may be required to establish the project's own integration boundary.
+
+Do not assign general-purpose Kubernetes/CNI/platform penetration testing, CVE hunting, vulnerability discovery, dependency-internal audits or external-infrastructure remediation as software implementation tasks. A concrete dependency failure that breaks a required project security invariant is a task-linked blocker or environment/compatibility constraint to escalate, not authority to broaden the task into auditing the dependency. Treat unrelated external findings as out of scope unless the project directly depends on the unsafe behavior. Never weaken explicit task security gates, independent tester/reviewer checks or necessary negative controls under this ownership distinction.
+
 # Start every run by synchronizing state
 
 Work from the latest state of the repository and default branch. Git, not model memory or an old chat transcript, is the durable authority.
