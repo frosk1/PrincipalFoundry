@@ -262,6 +262,41 @@ func TestCreateGeneratesScopeBoundedFindingsAcrossExecutors(t *testing.T) {
 	}
 }
 
+func TestCreateGeneratesExternalInfrastructureSecurityOwnershipAcrossExecutors(t *testing.T) {
+	cases := []struct {
+		executor string
+		tester   string
+		reviewer string
+	}{
+		{"opencode", ".opencode/agents/tester.md", ".opencode/agents/reviewer.md"},
+		{"claude-code", ".claude/agents/tester.md", ".claude/agents/reviewer.md"},
+		{"codex", ".codex/agents/tester.toml", ".codex/agents/reviewer.toml"},
+	}
+	for _, tc := range cases {
+		t.Run(tc.executor, func(t *testing.T) {
+			root, err := Create(Config{Name: "security-boundary", Executor: tc.executor, ParentDir: t.TempDir()})
+			if err != nil {
+				t.Fatal(err)
+			}
+			for _, path := range []string{"AGENTS.md", tc.tester, tc.reviewer} {
+				body := readGeneratedFile(t, root, path)
+				for _, marker := range []string{
+					"## Security ownership of external infrastructure",
+					"Kubernetes",
+					"CNI",
+					"PostgreSQL",
+					"NATS",
+					"independent",
+				} {
+					if !strings.Contains(body, marker) {
+						t.Errorf("%s missing dependency ownership boundary %q", path, marker)
+					}
+				}
+			}
+		})
+	}
+}
+
 func TestCreateGeneratesExecutorEvidenceContract(t *testing.T) {
 	root, err := Create(Config{Name: "demo", Architect: "chatgpt", Executor: "opencode", ParentDir: t.TempDir()})
 	if err != nil {
