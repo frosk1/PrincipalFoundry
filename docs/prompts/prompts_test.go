@@ -38,6 +38,23 @@ func TestArchitectDevelopmentLoopRequiresStatusReportForEveryRun(t *testing.T) {
 	}
 }
 
+func TestArchitectDevelopmentLoopLimitsExternalInfrastructureSecurityAudits(t *testing.T) {
+	template := ArchitectDevelopmentLoopTemplate()
+	for _, marker := range []string{
+		"# Security ownership boundary for planning and reviews",
+		"project owns",
+		"Kubernetes",
+		"CNI",
+		"penetration testing",
+		"supported disposable environment",
+		"Never weaken explicit task security gates",
+	} {
+		if !strings.Contains(template, marker) {
+			t.Errorf("architect prompt missing security ownership boundary %q", marker)
+		}
+	}
+}
+
 func TestRenderArchitectDevelopmentLoopInjectsNormalizedRepositoryURL(t *testing.T) {
 	got, err := RenderArchitectDevelopmentLoop(" https://github.com/frosk1/Principalfoundry.git/ ")
 	if err != nil {
