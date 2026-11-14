@@ -82,6 +82,7 @@ func executionPrompt(repoURL string, task Task) string {
 	b.WriteString("Perform the required tester, reviewer, and deterministic verification loop defined by AGENTS.md.\n")
 	b.WriteString("Update the required .factory evidence files: IMPLEMENTATION_REPORT.md, TESTER_REPORT.md, INTERNAL_REVIEW.md, and VERIFICATION_REPORT.md.\n\n")
 	b.WriteString("Do not change product requirements. Do not make unauthorized architecture decisions; return ARCHITECT_DECISION_REQUIRED when one is genuinely required. Do not start another task.\n\n")
+	b.WriteString("Routine cleanup of your own transient scratch does not require stopping for permission. If untracked scratch files that you created while analysing logs/tests (and that are not required evidence, reports, source, tests or user changes) block a clean handoff, move them outside the repository to a temporary quarantine directory, verify that only your own scratch was moved, and continue. Never delete, rewrite or move primary evidence, task reports or files you did not create. If you are unsure whether a file is evidence or user work, stop and report it instead of moving it. Record the quarantine in the handoff when relevant.\n\n")
 	b.WriteString("Commit the completed executor handoff, and push it to the shared branch when the repository's Git policy permits.\n")
 	return b.String()
 }

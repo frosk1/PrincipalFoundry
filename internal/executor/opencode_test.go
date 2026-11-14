@@ -91,3 +91,18 @@ func TestExecutionPromptReferencesContract(t *testing.T) {
 		}
 	}
 }
+
+func TestExecutionPromptAllowsRoutineScratchQuarantine(t *testing.T) {
+	prompt := executionPrompt("https://example.invalid/repo", Task{Present: true, ID: "TASK-0001", Revision: 1})
+
+	for _, marker := range []string{
+		"transient scratch",
+		"temporary quarantine directory",
+		"Never delete, rewrite or move primary evidence",
+		"files you did not create",
+	} {
+		if !strings.Contains(prompt, marker) {
+			t.Errorf("execution prompt missing routine scratch quarantine marker %q", marker)
+		}
+	}
+}
